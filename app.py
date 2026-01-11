@@ -11,6 +11,7 @@ import razorpay
 import hmac, hashlib
 import traceback
 import json
+from flask_mail import Mail, Message
 
 load_dotenv(override=True)
 from utils.image_utils import save_product_image
@@ -24,6 +25,17 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = "mysecret"
+
+# --- Email Configuration ---
+app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER', 'smtp.gmail.com')
+app.config['MAIL_PORT'] = int(os.getenv('MAIL_PORT', 587))
+app.config['MAIL_USE_TLS'] = os.getenv('MAIL_USE_TLS', 'True') == 'True'
+app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL', 'False') == 'True'
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
+
+mail = Mail(app)
 
 # --- Upload configuration ---
 UPLOAD_FOLDER = os.path.join("static", "uploads")
@@ -114,6 +126,224 @@ def cleanup_old_new_launches():
     
     return len(old_launches)
 
+def send_order_confirmation_email(order):
+    """Send order confirmation email to customer"""
+    try:
+        # Get order items
+        items = OrderItem.query.filter_by(order_id=order.id).all()
+        
+        # Build items HTML
+        items_html = ""
+        wrap_total = 0
+        
+        for item in items:
+            product = Product.query.get(item.product_id)
+            
+            # Get variant info
+            variant_info = ""
+            if item.color_variant_name:
+                variant_info += f"<br><small style='color: #666;'><i>Color:</i> {item.color_variant_name}</small>"
+            if item.size_variant_name:
+                variant_info += f"<br><small style='color: #666;'><i>Size:</i> {item.size_variant_name}</small>"
+            
+            # Check for gift wrap
+            gift_wrap = GiftWrap.query.filter_by(order_item_id=item.id).first()
+            wrap_info = ""
+            if gift_wrap:
+                wrap_info = f"<br><small style='color: #8B6F47; background: #FFF8F0; padding: 2px 6px; border-radius: 3px;'><strong>🎁 Gift Wrap:</strong> {gift_wrap.wrap_type.title()} (+₹{gift_wrap.wrap_price})</small>"
+                wrap_total += gift_wrap.wrap_price
+            
+            items_html += f"""
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">
+                    <strong>{item.product_name}</strong>{variant_info}{wrap_info}
+                </td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">{item.quantity}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹{item.unit_price}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹{item.unit_price * item.quantity}</td>
+            </tr>
+            """
+        
+        # Add wrap total row if applicable
+        wrap_row = ""
+        if wrap_total > 0:
+            wrap_row = f"""
+            <tr style="background: #FFF8F0;">
+                <td colspan="3" style="padding: 10px; text-align: right;"><strong>🎁 Gift Wrap Total:</strong></td>
+                <td style="padding: 10px; text-align: right;"><strong>₹{wrap_total}</strong></td>
+            </tr>
+            """
+        
+        # Email HTML template
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: #A67C52; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+                .content {{ background: #fff; padding: 30px; border: 1px solid #ddd; }}
+                .order-details {{ background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }}
+                .footer {{ background: #f4f4f4; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; font-size: 12px; color: #666; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 20px 0; }}
+                .total {{ font-size: 18px; font-weight: bold; color: #A67C52; }}
+                .button {{ display: inline-block; padding: 12px 30px; background: #A67C52; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎉 Order Confirmed!</h1>
+                    <p>Thank you for your purchase at KCX Crochet Store</p>
+                </div>
+                
+                <div class="content">
+                    <p>Dear {order.customer_name},</p>
+                    
+                    <p>We're excited to let you know that your order has been successfully placed! Here are your order details:</p>
+                    
+                    <div class="order-details">
+                        <h3 style="margin-top: 0; color: #A67C52;">Order #KCX{order.id}</h3>
+                        <p><strong>Order Date:</strong> {order.created_at.strftime('%B %d, %Y at %I:%M %p')}</p>
+                        <p><strong>Payment Status:</strong> <span style="color: #4CAF50;">{order.payment_status}</span></p>
+                    </div>
+                    
+                    <h3>Order Items:</h3>
+                    <table>
+                        <thead>
+                            <tr style="background: #f4f4f4;">
+                                <th style="padding: 10px; text-align: left;">Product</th>
+                                <th style="padding: 10px; text-align: center;">Qty</th>
+                                <th style="padding: 10px; text-align: right;">Price</th>
+                                <th style="padding: 10px; text-align: right;">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {items_html}
+                        </tbody>
+                        <tfoot>
+                            {wrap_row}
+                            <tr>
+                                <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold;">Total:</td>
+                                <td style="padding: 15px; text-align: right;" class="total">₹{order.total_amount}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <h3>Delivery Address:</h3>
+                    <div class="order-details">
+                        <p style="margin: 5px 0;"><strong>{order.customer_name}</strong></p>
+                        <p style="margin: 5px 0;">{order.address}</p>
+                        <p style="margin: 5px 0;">{order.city}, {order.pincode}</p>
+                        <p style="margin: 5px 0;">📱 {order.phone}</p>
+                        {f'<p style="margin: 5px 0;">📧 {order.email}</p>' if order.email else ''}
+                    </div>
+                    
+                    <p style="margin-top: 30px;">Your order will be carefully handcrafted and shipped within 5-7 business days. You'll receive a tracking number once it's dispatched.</p>
+                    
+                    <p>If you have any questions about your order, feel free to reply to this email or contact us.</p>
+                    
+                    <p style="margin-top: 30px;">Thank you for supporting handmade! ❤️</p>
+                </div>
+                
+                <div class="footer">
+                    <p><strong>KCX Crochet Store</strong></p>
+                    <p>Handmade with love in India 🇮🇳</p>
+                    <p>Questions? Email us at {app.config['MAIL_DEFAULT_SENDER']}</p>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Send email
+        msg = Message(
+            subject=f'Order Confirmation - Order #KCX{order.id}',
+            recipients=[order.email] if order.email else [],
+            html=html_body
+        )
+        
+        if order.email:
+            mail.send(msg)
+            print(f"✓ Order confirmation email sent to {order.email}")
+            return True
+        else:
+            print("⚠ No email address provided for order")
+            return False
+            
+    except Exception as e:
+        print(f"✗ Failed to send email: {e}")
+        traceback.print_exc()
+        return False
+    
+
+def send_admin_order_notification(order):
+    """Send order notification to admin"""
+    try:
+        items = OrderItem.query.filter_by(order_id=order.id).all()
+        
+        items_text = ""
+        wrap_total = 0
+        
+        for item in items:
+            variant_info = ""
+            if item.color_variant_name:
+                variant_info += f" | Color: {item.color_variant_name}"
+            if item.size_variant_name:
+                variant_info += f" | Size: {item.size_variant_name}"
+            
+            # Check for gift wrap
+            gift_wrap = GiftWrap.query.filter_by(order_item_id=item.id).first()
+            wrap_info = ""
+            if gift_wrap:
+                wrap_info = f" | 🎁 Gift Wrap: {gift_wrap.wrap_type.title()} (+₹{gift_wrap.wrap_price})"
+                wrap_total += gift_wrap.wrap_price
+            
+            items_text += f"- {item.product_name}{variant_info}{wrap_info}\n  Qty: {item.quantity} x ₹{item.unit_price} = ₹{item.unit_price * item.quantity}\n\n"
+        
+        if wrap_total > 0:
+            items_text += f"🎁 Gift Wrap Total: ₹{wrap_total}\n\n"
+        
+        admin_email = os.getenv('ADMIN_EMAIL')
+        if not admin_email:
+            return False
+        
+        msg = Message(
+            subject=f'🔔 New Order #KCX{order.id} - ₹{order.total_amount}',
+            recipients=[admin_email],
+            body=f"""
+New order received!
+
+Order ID: #KCX{order.id}
+Customer: {order.customer_name}
+Phone: {order.phone}
+Email: {order.email or 'Not provided'}
+
+Items:
+{items_text}
+
+Total: ₹{order.total_amount}
+Payment Status: {order.payment_status}
+
+Address:
+{order.address}
+{order.city}, {order.pincode}
+
+Notes: {order.notes or 'None'}
+
+---
+View full details in admin panel
+            """
+        )
+        
+        mail.send(msg)
+        print(f"✓ Admin notification sent")
+        return True
+        
+    except Exception as e:
+        print(f"✗ Failed to send admin email: {e}")
+        return False
 
 class ProductImage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -150,6 +380,69 @@ class GiftWrap(db.Model):
     
     order_item = db.relationship("OrderItem", backref="gift_wrap")
 
+
+class ProductReview(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    customer_name = db.Column(db.String(100), nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # 1-5 stars
+    review_text = db.Column(db.Text, nullable=False)
+    image1_url = db.Column(db.String(255), nullable=True)
+    image2_url = db.Column(db.String(255), nullable=True)
+    is_approved = db.Column(db.Boolean, default=False)  # Admin approval
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    product = db.relationship('Product', backref='reviews')
+    
+    def __repr__(self):
+        return f"<Review {self.id} for Product {self.product_id}>"
+
+class Coupon(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)  # e.g., "SAVE20"
+    discount_type = db.Column(db.String(20), nullable=False)  # "percentage" or "fixed"
+    discount_value = db.Column(db.Integer, nullable=False)  # 20 for 20% or 100 for ₹100
+    min_order_value = db.Column(db.Integer, default=0)  # Minimum cart value to use coupon
+    max_uses = db.Column(db.Integer, nullable=True)  # Total times coupon can be used
+    max_uses_per_user = db.Column(db.Integer, default=1)  # Times per user
+    times_used = db.Column(db.Integer, default=0)  # Track usage
+    is_active = db.Column(db.Boolean, default=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def is_valid(self, cart_total, user_identifier=None):
+        """Check if coupon is valid"""
+        # Check if active
+        if not self.is_active:
+            return False, "This coupon is inactive"
+        
+        # Check expiry
+        if self.expires_at and datetime.utcnow() > self.expires_at:
+            return False, "This coupon has expired"
+        
+        # Check max uses
+        if self.max_uses and self.times_used >= self.max_uses:
+            return False, "This coupon has reached its usage limit"
+        
+        # Check minimum order value
+        if cart_total < self.min_order_value:
+            return False, f"Minimum order value of ₹{self.min_order_value} required"
+        
+        # TODO: Check per-user usage (implement if needed)
+        
+        return True, "Coupon is valid"
+    
+    def calculate_discount(self, cart_total):
+        """Calculate discount amount"""
+        if self.discount_type == "percentage":
+            discount = int(cart_total * self.discount_value / 100)
+        else:  # fixed
+            discount = self.discount_value
+        
+        # Discount cannot exceed cart total
+        return min(discount, cart_total)
+
+
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(120), nullable=False)
@@ -166,6 +459,9 @@ class Order(db.Model):
     razorpay_order_id = db.Column(db.String(120), nullable=True)
     razorpay_payment_id = db.Column(db.String(120), nullable=True)
     razorpay_signature = db.Column(db.String(300), nullable=True)
+    coupon_code = db.Column(db.String(50), nullable=True)
+    coupon_discount = db.Column(db.Integer, default=0)
+    subtotal = db.Column(db.Integer, nullable=False, default=0)  
 
     items = db.relationship("OrderItem", backref="order", lazy=True)
 
@@ -180,6 +476,9 @@ class OrderItem(db.Model):
     unit_price = db.Column(db.Integer, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     
+    color_variant_name = db.Column(db.String(50), nullable=True)
+    size_variant_name = db.Column(db.String(50), nullable=True)
+
     def __repr__(self):
         return f"<OrderItem {self.product_name} x{self.quantity}>"
 
@@ -193,18 +492,48 @@ def get_cart():
     return session["cart"]
 
 def build_cart():
-    """Convert session cart (id -> qty) to list of products, total and count."""
+    """Convert session cart to list of products with variant info, total and count."""
     cart = session.get("cart", {})
     items = []
     total = 0
     count = 0
 
-    for product_id, qty in cart.items():
+    for cart_key, cart_data in cart.items():
+        # Handle old cart format (just product_id: qty)
+        if isinstance(cart_data, int):
+            product_id = int(cart_key)
+            qty = cart_data
+            color_variant = None
+            size_variant = None
+        else:
+            # New cart format with variants
+            product_id = cart_data.get('product_id')
+            qty = cart_data.get('quantity', 1)
+            color_id = cart_data.get('color_id')
+            size_id = cart_data.get('size_id')
+            
+            # Fetch variant details
+            color_variant = ProductVariant.query.get(color_id) if color_id else None
+            size_variant = ProductVariant.query.get(size_id) if size_id else None
+        
         product = Product.query.get(int(product_id))
         if product:
-            # Use sale price if available, otherwise regular price
+            # Calculate price with variant adjustments
             effective_price = product.sale_price if product.sale_price else product.price
-            items.append({"product": product, "quantity": qty})
+            
+            if color_variant and color_variant.price_adjustment:
+                effective_price += color_variant.price_adjustment
+            if size_variant and size_variant.price_adjustment:
+                effective_price += size_variant.price_adjustment
+            
+            items.append({
+                "cart_key": cart_key,
+                "product": product,
+                "quantity": qty,
+                "effective_price": effective_price,
+                "color_variant": color_variant,
+                "size_variant": size_variant
+            })
             total += effective_price * qty
             count += qty
 
@@ -234,12 +563,19 @@ def home():
     # Get products by category for home page
     category_products = {}
     for category in Category.query.order_by(Category.order_index).all():
-        products = Product.query.filter_by(category=category.name).limit(4).all()
+        products = Product.query.filter_by(category=category.name)\
+            .order_by(Product.is_new_launch.desc(), Product.id.desc()).limit(4).all()
         if products:
             category_products[category.name] = products
     
-    return render_template("home.html", products=bestsellers, category_products=category_products)
-
+    # Get recent approved reviews for homepage (last 8 reviews)
+    recent_reviews = ProductReview.query.filter_by(is_approved=True)\
+        .order_by(ProductReview.created_at.desc()).limit(8).all()
+    
+    return render_template("home.html", 
+                         products=bestsellers, 
+                         category_products=category_products,
+                         recent_reviews=recent_reviews)
 
 @app.route("/shop")
 def shop():
@@ -317,14 +653,67 @@ def product_detail(product_id):
             Product.id != product_id
         ).order_by(db.func.random()).limit(4).all()
     
+     # Get approved reviews for this product
+    approved_reviews = ProductReview.query.filter_by(
+        product_id=product_id,
+        is_approved=True
+    ).order_by(ProductReview.created_at.desc()).all()
+    
+    # Calculate average rating
+    avg_rating = 0
+    if approved_reviews:
+        avg_rating = sum(r.rating for r in approved_reviews) / len(approved_reviews)
+
     return render_template(
         "product.html", 
         product=product, 
         suggested_products=suggested,
         color_variants_json=json.dumps(colors_data),
-        size_variants_json=json.dumps(sizes_data)
+        size_variants_json=json.dumps(sizes_data),
+        reviews=approved_reviews,  
+        avg_rating=avg_rating,  
+        review_count=len(approved_reviews)
     )
 
+@app.route("/product/<int:product_id>/review", methods=["POST"])
+def submit_review(product_id):
+    product = Product.query.get_or_404(product_id)
+    
+    customer_name = request.form.get("name", "Anonymous").strip()
+    rating = int(request.form.get("rating", 5))
+    review_text = request.form.get("review", "").strip()
+    
+    if not review_text or len(review_text) < 10:
+        flash("Review must be at least 10 characters long", "danger")
+        return redirect(url_for('product_detail', product_id=product_id))
+    
+    # Create review
+    review = ProductReview(
+        product_id=product_id,
+        customer_name=customer_name,
+        rating=rating,
+        review_text=review_text,
+        is_approved=False  # Pending admin approval
+    )
+    
+    # Handle image uploads (max 2)
+    image_files = request.files.getlist("review_images")
+    saved_count = 0
+    
+    for img_file in image_files[:2]:  # Max 2 images
+        if img_file and img_file.filename and allowed_file(img_file.filename):
+            image_url = save_product_image(img_file)  # Reuse existing function
+            if saved_count == 0:
+                review.image1_url = image_url
+            else:
+                review.image2_url = image_url
+            saved_count += 1
+    
+    db.session.add(review)
+    db.session.commit()
+    
+    flash("Thank you! Your review has been submitted and is pending approval.", "success")
+    return redirect(url_for('product_detail', product_id=product_id))
 
 @app.route("/create_order", methods=["POST"])
 def create_order():
@@ -369,6 +758,37 @@ def create_order():
         "key": RAZORPAY_KEY_ID
     })
 
+@app.route("/validate_coupon", methods=["POST"])
+def validate_coupon():
+    data = request.get_json()
+    code = data.get("code", "").strip().upper()
+    cart_total = int(data.get("cart_total", 0))
+    
+    if not code:
+        return jsonify({"valid": False, "message": "Please enter a coupon code"})
+    
+    coupon = Coupon.query.filter_by(code=code).first()
+    
+    if not coupon:
+        return jsonify({"valid": False, "message": "Invalid coupon code"})
+    
+    is_valid, message = coupon.is_valid(cart_total)
+    
+    if not is_valid:
+        return jsonify({"valid": False, "message": message})
+    
+    discount = coupon.calculate_discount(cart_total)
+    new_total = cart_total - discount
+    
+    return jsonify({
+        "valid": True,
+        "message": f"Coupon '{code}' applied successfully!",
+        "discount": discount,
+        "new_total": new_total,
+        "discount_type": coupon.discount_type,
+        "discount_value": coupon.discount_value
+    })
+
 @app.route("/verify_payment", methods=["POST"])
 def verify_payment():
     payload = request.get_json() or {}
@@ -403,6 +823,10 @@ def verify_payment():
         order.razorpay_payment_id = r_payment_id
         order.razorpay_signature = r_signature
         db.session.commit()
+        
+        # Send confirmation email
+        send_order_confirmation_email(order)
+        send_admin_order_notification(order)
 
     return jsonify({"status": "success"})
 
@@ -495,8 +919,18 @@ def admin_products():
 def admin_index():
     orders_count = Order.query.count()
     products_count = Product.query.count()
-    today = datetime.utcnow().date()
-    todays_count = Order.query.filter(db.func.date(Order.created_at) == today).count()
+    
+    # FIX: Correct today's date filtering
+    from datetime import datetime, date
+    today = date.today()
+    
+    # Count orders where created_at date equals today
+    todays_count = Order.query.filter(
+        db.func.date(Order.created_at) == today
+    ).count()
+    
+    print(f"DEBUG: Today is {today}, found {todays_count} orders")
+    
     return render_template("admin_index.html",
                            orders_count=orders_count,
                            products_count=products_count,
@@ -749,6 +1183,11 @@ def admin_orders():
 def admin_order_detail(order_id):
     order = Order.query.get_or_404(order_id)
     items = OrderItem.query.filter_by(order_id=order.id).all()
+    
+    # Load gift wraps for each item
+    for item in items:
+        item.gift_wrap_list = GiftWrap.query.filter_by(order_item_id=item.id).all()
+    
     return render_template("admin_order_detail.html", order=order, items=items)
 
 
@@ -817,38 +1256,68 @@ def admin_orders_export():
 @app.route("/add/<int:product_id>")
 def add_to_cart(product_id):
     cart = get_cart()
-    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+    
+    # Get variant selections from query params
+    color_id = request.args.get('color')
+    size_id = request.args.get('size')
+    
+    # Create unique cart key with variants
+    cart_key = str(product_id)
+    if color_id:
+        cart_key += f"_c{color_id}"
+    if size_id:
+        cart_key += f"_s{size_id}"
+    
+    # Store as dict with variant info
+    if cart_key not in cart:
+        cart[cart_key] = {
+            'product_id': product_id,
+            'quantity': 1,
+            'color_id': color_id,
+            'size_id': size_id
+        }
+    else:
+        cart[cart_key]['quantity'] += 1
+    
     session["cart"] = cart
     session["open_cart"] = True
     return redirect(request.referrer or url_for("shop"))
 
 
-@app.route("/cart/increase/<int:product_id>")
-def increase_quantity(product_id):
+@app.route("/cart/increase/<path:cart_key>")
+def increase_quantity(cart_key):
     cart = get_cart()
-    cart[str(product_id)] = cart.get(str(product_id), 0) + 1
+    if cart_key in cart:
+        if isinstance(cart[cart_key], int):
+            cart[cart_key] += 1
+        else:
+            cart[cart_key]['quantity'] += 1
     session["cart"] = cart
     session["open_cart"] = True
     return redirect(request.referrer or url_for("cart"))
 
 
-@app.route("/cart/decrease/<int:product_id>")
-def decrease_quantity(product_id):
+@app.route("/cart/decrease/<path:cart_key>")
+def decrease_quantity(cart_key):
     cart = get_cart()
-    pid = str(product_id)
-    if pid in cart:
-        cart[pid] -= 1
-        if cart[pid] <= 0:
-            cart.pop(pid)
+    if cart_key in cart:
+        if isinstance(cart[cart_key], int):
+            cart[cart_key] -= 1
+            if cart[cart_key] <= 0:
+                cart.pop(cart_key)
+        else:
+            cart[cart_key]['quantity'] -= 1
+            if cart[cart_key]['quantity'] <= 0:
+                cart.pop(cart_key)
     session["cart"] = cart
     session["open_cart"] = True
     return redirect(request.referrer or url_for("cart"))
 
 
-@app.route("/cart/remove/<int:product_id>")
-def remove_from_cart(product_id):
+@app.route("/cart/remove/<path:cart_key>")
+def remove_from_cart(cart_key):
     cart = get_cart()
-    cart.pop(str(product_id), None)
+    cart.pop(cart_key, None)
     session["cart"] = cart
     session["open_cart"] = True
     return redirect(request.referrer or url_for("cart"))
@@ -903,6 +1372,8 @@ def checkout():
                 product_name=item["product"].name,
                 unit_price=effective_price,
                 quantity=item["quantity"],
+                color_variant_name=item["color_variant"].name if item["color_variant"] else None,
+                size_variant_name=item["size_variant"].name if item["size_variant"] else None
             )
             db.session.add(oi)
 
@@ -951,18 +1422,32 @@ def checkout_ajax():
     pincode = request.form.get("pincode") or ""
     notes = request.form.get("notes") or ""
     
-    # ADD THIS: Get gift wrap data
+    coupon_code = request.form.get("coupon_code", "").strip().upper()
+    coupon_discount = 0
+    
+    if coupon_code:
+        coupon = Coupon.query.filter_by(code=coupon_code).first()
+        if coupon:
+            is_valid, message = coupon.is_valid(total)
+            if is_valid:
+                coupon_discount = coupon.calculate_discount(total)
+                coupon.times_used += 1
+
+    # Get gift wrap data
     import json
     gift_wraps_json = request.form.get("gift_wraps", "{}")
     gift_wraps = {}
     try:
         gift_wraps = json.loads(gift_wraps_json)
-    except:
-        pass
+        print(f"DEBUG: Received gift wraps: {gift_wraps}")
+    except Exception as e:
+        print(f"ERROR parsing gift wraps: {e}")
     
     # Calculate total with gift wraps
     wrap_total = sum(wrap.get('price', 0) for wrap in gift_wraps.values())
-    final_total = total + wrap_total
+    final_total = total + wrap_total - coupon_discount
+    
+    print(f"DEBUG: Items total: ₹{total}, Wrap total: ₹{wrap_total}, Final: ₹{final_total}")
 
     order = Order(
         customer_name=customer_name,
@@ -972,40 +1457,56 @@ def checkout_ajax():
         city=city,
         pincode=pincode,
         notes=notes,
-        total_amount=final_total,  # CHANGE: Use final_total instead of total
+        subtotal=subtotal,  
+        coupon_code=coupon_code if coupon_discount > 0 else None,  
+        coupon_discount=coupon_discount,  
+        total_amount=final_total,
         payment_status="Unpaid",
         status="Pending"
     )
     db.session.add(order)
     db.session.flush()
+    
+    print(f"DEBUG: Created order #{order.id}")
 
+    # Process each cart item
     for it in items:
         prod = it["product"]
         qty = it["quantity"]
-        effective_price = prod.sale_price if prod.sale_price else prod.price
+        effective_price = it["effective_price"]  # Includes variant adjustments
+        
         oi = OrderItem(
             order_id=order.id,
             product_id=prod.id,
             product_name=prod.name,
             unit_price=effective_price,
-            quantity=qty
+            quantity=qty,
+            color_variant_name=it["color_variant"].name if it["color_variant"] else None,
+            size_variant_name=it["size_variant"].name if it["size_variant"] else None
         )
         db.session.add(oi)
         db.session.flush()
         
-        # ADD THIS: Handle gift wrap for this item
+        print(f"DEBUG: Added OrderItem {oi.id} for product {prod.name}")
+        
+        # Check if this product has gift wrap
         product_id_str = str(prod.id)
         if product_id_str in gift_wraps:
             wrap_data = gift_wraps[product_id_str]
-            db.session.add(GiftWrap(
+            gift_wrap = GiftWrap(
                 order_item_id=oi.id,
                 wrap_type=wrap_data.get('type'),
                 wrap_price=wrap_data.get('price')
-            ))
+            )
+            db.session.add(gift_wrap)
+            print(f"DEBUG: Added gift wrap '{wrap_data.get('type')}' (₹{wrap_data.get('price')}) to item {oi.id}")
+        else:
+            print(f"DEBUG: No gift wrap for product {prod.id}")
 
     db.session.commit()
+    print(f"DEBUG: Order {order.id} committed successfully\n")
 
-    return jsonify({"order_id": order.id, "total": final_total})  # CHANGE: Return final_total
+    return jsonify({"order_id": order.id, "total": final_total})
 
 # ----- CATEGORY MANAGEMENT ROUTES -----
 
@@ -1014,6 +1515,143 @@ def checkout_ajax():
 def admin_categories():
     categories = Category.query.order_by(Category.order_index).all()
     return render_template("admin_categories.html", categories=categories)
+
+@app.route("/admin/reviews")
+@admin_required
+def admin_reviews():
+    pending_reviews = ProductReview.query.filter_by(is_approved=False).order_by(ProductReview.created_at.desc()).all()
+    approved_reviews = ProductReview.query.filter_by(is_approved=True).order_by(ProductReview.created_at.desc()).all()
+    return render_template("admin_reviews.html", pending=pending_reviews, approved=approved_reviews)
+    
+@app.route("/admin/coupons")
+@admin_required
+def admin_coupons():
+    coupons = Coupon.query.order_by(Coupon.created_at.desc()).all()
+    return render_template("admin_coupons.html", coupons=coupons)
+
+@app.route("/admin/coupons/add", methods=["GET", "POST"])
+@admin_required
+def admin_coupon_add():
+    if request.method == "POST":
+        code = request.form.get("code", "").strip().upper()
+        discount_type = request.form.get("discount_type")
+        discount_value = int(request.form.get("discount_value") or 0)
+        min_order_value = int(request.form.get("min_order_value") or 0)
+        max_uses = request.form.get("max_uses")
+        max_uses = int(max_uses) if max_uses else None
+        expires_at_str = request.form.get("expires_at")
+        
+        expires_at = None
+        if expires_at_str:
+            try:
+                expires_at = datetime.strptime(expires_at_str, "%Y-%m-%d")
+            except:
+                pass
+        
+        # Check if code already exists
+        existing = Coupon.query.filter_by(code=code).first()
+        if existing:
+            flash(f"Coupon code '{code}' already exists!", "danger")
+            return redirect(url_for("admin_coupon_add"))
+        
+        coupon = Coupon(
+            code=code,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            min_order_value=min_order_value,
+            max_uses=max_uses,
+            expires_at=expires_at,
+            is_active=True
+        )
+        
+        db.session.add(coupon)
+        db.session.commit()
+        flash(f"Coupon '{code}' created successfully!", "success")
+        return redirect(url_for("admin_coupons"))
+    
+    from datetime import datetime
+    return render_template("admin_coupon_form.html", coupon=None, now=datetime.utcnow())
+
+@app.route("/admin/coupons/edit/<int:coupon_id>", methods=["GET", "POST"])
+@admin_required
+def admin_coupon_edit(coupon_id):
+    coupon = Coupon.query.get_or_404(coupon_id)
+    
+    if request.method == "POST":
+        coupon.code = request.form.get("code", "").strip().upper()
+        coupon.discount_type = request.form.get("discount_type")
+        coupon.discount_value = int(request.form.get("discount_value") or 0)
+        coupon.min_order_value = int(request.form.get("min_order_value") or 0)
+        
+        max_uses = request.form.get("max_uses")
+        coupon.max_uses = int(max_uses) if max_uses else None
+        
+        expires_at_str = request.form.get("expires_at")
+        if expires_at_str:
+            try:
+                coupon.expires_at = datetime.strptime(expires_at_str, "%Y-%m-%d")
+            except:
+                coupon.expires_at = None
+        else:
+            coupon.expires_at = None
+        
+        db.session.commit()
+        flash(f"Coupon '{coupon.code}' updated successfully!", "success")
+        return redirect(url_for("admin_coupons"))
+    
+    from datetime import datetime
+    return render_template("admin_coupon_form.html", coupon=coupon, now=datetime.utcnow())
+
+@app.route("/admin/coupons/toggle/<int:coupon_id>", methods=["POST"])
+@admin_required
+def admin_coupon_toggle(coupon_id):
+    coupon = Coupon.query.get_or_404(coupon_id)
+    coupon.is_active = not coupon.is_active
+    db.session.commit()
+    
+    status = "activated" if coupon.is_active else "deactivated"
+    flash(f"Coupon '{coupon.code}' {status}!", "success")
+    return redirect(url_for("admin_coupons"))
+
+@app.route("/admin/coupons/delete/<int:coupon_id>", methods=["POST"])
+@admin_required
+def admin_coupon_delete(coupon_id):
+    coupon = Coupon.query.get_or_404(coupon_id)
+    code = coupon.code
+    db.session.delete(coupon)
+    db.session.commit()
+    flash(f"Coupon '{code}' deleted!", "success")
+    return redirect(url_for("admin_coupons"))
+
+
+@app.route("/admin/reviews/<int:review_id>/approve", methods=["POST"])
+@admin_required
+def admin_approve_review(review_id):
+    review = ProductReview.query.get_or_404(review_id)
+    review.is_approved = True
+    db.session.commit()
+    flash(f"Review from {review.customer_name} approved!", "success")
+    return redirect(url_for('admin_reviews'))
+
+@app.route("/admin/reviews/<int:review_id>/reject", methods=["POST"])
+@admin_required
+def admin_reject_review(review_id):
+    review = ProductReview.query.get_or_404(review_id)
+    
+    # Delete images if they exist
+    for img_url in [review.image1_url, review.image2_url]:
+        if img_url:
+            try:
+                img_path = os.path.join("static", img_url)
+                if os.path.exists(img_path):
+                    os.remove(img_path)
+            except:
+                pass
+    
+    db.session.delete(review)
+    db.session.commit()
+    flash(f"Review from {review.customer_name} deleted.", "info")
+    return redirect(url_for('admin_reviews'))
 
 @app.route("/admin/categories/add", methods=["POST"])
 @admin_required

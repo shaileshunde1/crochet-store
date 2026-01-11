@@ -180,7 +180,8 @@
 </section>
 {% endif %}
 
-<!-- Customer Reviews Section -->
+<!-- Customer Reviews Section - DYNAMIC -->
+{% if recent_reviews and recent_reviews|length > 0 %}
 <section class="py-5" style="background-color: #f8f9fa;">
   <div class="container">
     <div class="text-center mb-5">
@@ -188,144 +189,57 @@
       <p class="section-subtitle">Real reviews from real customers ❤️</p>
     </div>
 
-    <div class="row g-4">
-      <!-- Review 1 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-primary rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                P
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Priya Sharma</h6>
-                <div class="text-warning">
-                  ★★★★★
+    <div class="reviews-carousel-wrapper position-relative">
+      <div class="reviews-carousel" id="reviewsCarousel">
+        {% for review in recent_reviews %}
+        <div class="review-card">
+          <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center mb-3">
+                <div class="review-avatar rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; background: {{ ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6c757d'][loop.index0 % 6] }};">
+                  {{ review.customer_name[0].upper() }}
+                </div>
+                <div class="ms-3">
+                  <h6 class="mb-0 fw-bold">{{ review.customer_name }}</h6>
+                  <div class="text-warning">
+                    {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
+                  </div>
                 </div>
               </div>
-            </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "Absolutely love my crochet keychain! The quality is amazing and it's so cute. Perfect gift for my best friend. Will definitely order more!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Mini Bouquet</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review 2 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-success rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                A
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Aisha Khan</h6>
-                <div class="text-warning">
-                  ★★★★★
+              
+              <p class="text-muted mb-2" style="line-height: 1.8;">
+                "{{ review.review_text[:120] }}{% if review.review_text|length > 120 %}...{% endif %}"
+              </p>
+              
+              {% if review.image1_url or review.image2_url %}
+                <div class="d-flex gap-2 mb-2">
+                  {% if review.image1_url %}
+                    <img src="{{ url_for('static', filename=review.image1_url) }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                  {% endif %}
+                  {% if review.image2_url %}
+                    <img src="{{ url_for('static', filename=review.image2_url) }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
+                  {% endif %}
                 </div>
-              </div>
+              {% endif %}
+              
+              <small class="text-muted d-block mt-3">
+                <a href="{{ url_for('product_detail', product_id=review.product_id) }}" class="text-decoration-none">
+                  Purchased: {{ review.product.name }}
+                </a>
+              </small>
             </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "The forever flowers are stunning! They look so real and the craftsmanship is incredible. My room looks so much prettier now. Highly recommend!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Forever Flowers</small>
           </div>
         </div>
+        {% endfor %}
       </div>
-
-      <!-- Review 3 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-danger rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                R
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Riya Patel</h6>
-                <div class="text-warning">
-                  ★★★★★
-                </div>
-              </div>
-            </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "Got a desk buddy for my workspace and it brings me so much joy! Super fast delivery and beautiful packaging. Worth every penny!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Desk Buddies</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review 4 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-warning rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                S
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Sneha Reddy</h6>
-                <div class="text-warning">
-                  ★★★★★
-                </div>
-              </div>
-            </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "The yarn quality is top-notch! I ordered custom colors and they turned out exactly as I imagined. Customer service was also very helpful!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Yarn</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review 5 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-info rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                M
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Meera Gupta</h6>
-                <div class="text-warning">
-                  ★★★★★
-                </div>
-              </div>
-            </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "Beautiful bookmark! Perfect for book lovers. The detail and colors are gorgeous. Already ordered two more as gifts for friends!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Bookmarks</small>
-          </div>
-        </div>
-      </div>
-
-      <!-- Review 6 -->
-      <div class="col-md-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-          <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-3">
-              <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem;">
-                N
-              </div>
-              <div class="ms-3">
-                <h6 class="mb-0 fw-bold">Neha Singh</h6>
-                <div class="text-warning">
-                  ★★★★★
-                </div>
-              </div>
-            </div>
-            <p class="text-muted mb-0" style="line-height: 1.8;">
-              "Ordered seasonal decorations for Diwali and they were absolutely stunning! Handmade with so much love and care. Will be a repeat customer for sure!"
-            </p>
-            <small class="text-muted d-block mt-3">Purchased: Seasonal</small>
-          </div>
-        </div>
-      </div>
+      
+      <!-- Navigation Arrows -->
+      <button class="carousel-btn carousel-btn-prev" onclick="scrollReviews(-1)">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button class="carousel-btn carousel-btn-next" onclick="scrollReviews(1)">
+        <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
 
     <div class="text-center mt-5">
@@ -333,6 +247,16 @@
     </div>
   </div>
 </section>
+{% else %}
+<!-- Fallback: Show placeholder if no reviews yet -->
+<section class="py-5" style="background-color: #f8f9fa;">
+  <div class="container text-center">
+    <h2 class="section-title mb-3">What Our Customers Say</h2>
+    <p class="text-muted">Be the first to leave a review! ⭐</p>
+    <a href="{{ url_for('shop') }}" class="btn btn-primary mt-3">Shop Now</a>
+  </div>
+</section>
+{% endif %}
 
 <style>
   /* Hero Section with Video */
@@ -484,6 +408,64 @@
     opacity: 0.9;
   }
 
+  /* Reviews Carousel */
+  .reviews-carousel-wrapper {
+    position: relative;
+    padding: 0 50px;
+  }
+
+  .reviews-carousel {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 1rem 0;
+  }
+
+  .reviews-carousel::-webkit-scrollbar {
+    display: none;
+  }
+
+  .review-card {
+    flex: 0 0 auto;
+    width: 350px;
+  }
+
+  .carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .carousel-btn:hover {
+    background: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  .carousel-btn-prev {
+    left: 0;
+  }
+
+  .carousel-btn-next {
+    right: 0;
+  }
+
   /* Responsive video */
   @media (max-width: 768px) {
     .hero-video-container {
@@ -500,6 +482,20 @@
 
     .category-name {
       font-size: 1.1rem;
+    }
+
+    .reviews-carousel-wrapper {
+      padding: 0 10px;
+    }
+    
+    .review-card {
+      width: 280px;
+    }
+    
+    .carousel-btn {
+      width: 35px;
+      height: 35px;
+      font-size: 0.9rem;
     }
   }
 </style>
@@ -549,6 +545,52 @@ document.addEventListener('DOMContentLoaded', function() {
       currentImageIndex = 0;
     });
   });
+
+  // Reviews Carousel Auto-scroll
+  let reviewsCarousel = document.getElementById('reviewsCarousel');
+  let autoScrollInterval;
+
+  function scrollReviews(direction) {
+    if (!reviewsCarousel) return;
+    const scrollAmount = 370; // Card width + gap
+    reviewsCarousel.scrollBy({
+      left: direction * scrollAmount,
+      behavior: 'smooth'
+    });
+  }
+
+  // Make scrollReviews global for onclick handlers
+  window.scrollReviews = scrollReviews;
+
+  // Auto-scroll every 4 seconds
+  if (reviewsCarousel && reviewsCarousel.children.length > 0) {
+    autoScrollInterval = setInterval(() => {
+      const maxScroll = reviewsCarousel.scrollWidth - reviewsCarousel.clientWidth;
+      
+      if (reviewsCarousel.scrollLeft >= maxScroll) {
+        // Reset to start
+        reviewsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        scrollReviews(1);
+      }
+    }, 4000);
+    
+    // Pause auto-scroll on hover
+    reviewsCarousel.addEventListener('mouseenter', () => {
+      clearInterval(autoScrollInterval);
+    });
+    
+    reviewsCarousel.addEventListener('mouseleave', () => {
+      autoScrollInterval = setInterval(() => {
+        const maxScroll = reviewsCarousel.scrollWidth - reviewsCarousel.clientWidth;
+        if (reviewsCarousel.scrollLeft >= maxScroll) {
+          reviewsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollReviews(1);
+        }
+      }, 4000);
+    });
+  }
 });
 </script>
 

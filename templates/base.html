@@ -384,12 +384,28 @@
               Admin
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{{ url_for('admin_index') }}">Dashboard</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}">Orders</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_products') }}">Products</a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_categories') }}">Categories</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_index') }}">
+                <i class="bi bi-speedometer2"></i> Dashboard
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}">
+                <i class="bi bi-receipt"></i> Orders
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_products') }}">
+                <i class="bi bi-box-seam"></i> Products
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_categories') }}">
+                <i class="bi bi-tags"></i> Categories
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_coupons') }}">
+                <i class="bi bi-tag-fill"></i> Coupons
+              </a></li>
+              <li><a class="dropdown-item" href="{{ url_for('admin_reviews') }}">
+                <i class="bi bi-star-fill text-warning"></i> Reviews
+              </a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('admin_logout') }}">Logout</a></li>
+              <li><a class="dropdown-item text-danger" href="{{ url_for('admin_logout') }}">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </a></li>
             </ul>
           </div>
           {% else %}
@@ -565,7 +581,17 @@
                 >
               </div>
               <div class="flex-grow-1">
-                <h6 class="mb-1">{{ item.product.name }}</h6>
+                <h6 class="mb-0">{{ item.product.name }}</h6>
+                {% if item.color_variant or item.size_variant %}
+                   <small class="text-muted d-block">
+                    {% if item.color_variant %}
+                      <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.color_variant.name }}</span>
+                     {% endif %}
+                     {% if item.size_variant %}
+                        <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.size_variant.name }}</span>
+                     {% endif %}
+                   </small>
+                  {% endif %}
                 
                 {% if item.size %}
                   <p class="small text-muted mb-1">Size: {{ item.size }}</p>
@@ -579,22 +605,22 @@
                 
                 {% if item.product.sale_price %}
                   <p class="small mb-1">
-                    <span class="text-decoration-line-through text-muted">₹{{ item.product.price }}</span>
+                    <span class="text-decoration-line-through text-muted">₹{{ item.effective_price }}</span>
                     <span class="text-danger fw-bold ms-2">₹{{ item.product.sale_price }}</span>
                   </p>
                 {% else %}
-                  <p class="small text-muted mb-1">₹{{ item.product.price }}</p>
+                  <p class="small text-muted mb-1">₹{{ item.effective_price }}</p>
                 {% endif %}
 
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="d-inline-flex align-items-center">
-                    <a href="{{ url_for('decrease_quantity', product_id=item.product.id) }}"
-                       class="btn btn-sm btn-outline-secondary">-</a>
-                    <span class="mx-2">{{ item.quantity }}</span>
-                    <a href="{{ url_for('increase_quantity', product_id=item.product.id) }}"
+                    <a href="{{ url_for('decrease_quantity', cart_key=item.cart_key) }}"
+                        class="btn btn-sm btn-outline-secondary">-</a>
+                    <span class="px-3">{{ item.quantity }}</span>
+                    <a href="{{ url_for('increase_quantity', cart_key=item.cart_key) }}"
                        class="btn btn-sm btn-outline-secondary">+</a>
                   </div>
-                  <a href="{{ url_for('remove_from_cart', product_id=item.product.id) }}"
+                  <a href="{{ url_for('remove_from_cart', cart_key=item.cart_key) }}"
                      class="btn btn-link text-danger small p-0">
                     Remove
                   </a>

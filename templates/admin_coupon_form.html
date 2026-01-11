@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}{% if coupon %}Edit{% else %}Create{% endif %} Coupon | Admin{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <a href="{{ url_for('admin_coupons') }}" class="btn btn-sm btn-outline-secondary mb-3">
+        <i class="bi bi-arrow-left"></i> Back to Coupons
+      </a>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h3 class="fw-bold mb-4">
+            <i class="bi bi-ticket-perforated me-2"></i>
+            {% if coupon %}Edit Coupon{% else %}Create New Coupon{% endif %}
+          </h3>
+
+          <form method="post">
+            
+            <!-- Coupon Code -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                Coupon Code *
+                <i class="bi bi-info-circle text-muted" title="Unique code customers will enter"></i>
+              </label>
+              <input type="text" 
+                     name="code" 
+                     class="form-control form-control-lg text-uppercase" 
+                     placeholder="e.g., SAVE20, WELCOME10"
+                     value="{{ coupon.code if coupon else '' }}"
+                     pattern="[A-Z0-9]+"
+                     style="font-weight: 600; letter-spacing: 1px;"
+                     required>
+              <div class="form-text">Use uppercase letters and numbers only. Example: SAVE20</div>
+            </div>
+
+            <!-- Discount Type & Value -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Discount Type *</label>
+                <select name="discount_type" class="form-select form-select-lg" id="discountType" required>
+                  <option value="percentage" {% if coupon and coupon.discount_type == 'percentage' %}selected{% endif %}>
+                    Percentage (%)
+                  </option>
+                  <option value="fixed" {% if coupon and coupon.discount_type == 'fixed' %}selected{% endif %}>
+                    Fixed Amount (₹)
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Discount Value *</label>
+                <div class="input-group input-group-lg">
+                  <span class="input-group-text" id="discountSymbol">%</span>
+                  <input type="number" 
+                         name="discount_value" 
+                         class="form-control" 
+                         placeholder="20"
+                         value="{{ coupon.discount_value if coupon else '' }}"
+                         min="1"
+                         required>
+                </div>
+                <div class="form-text" id="discountHint">
+                  Customer gets 20% off their order
+                </div>
+              </div>
+            </div>
+
+            <!-- Minimum Order Value -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                Minimum Order Value (₹)
+                <i class="bi bi-info-circle text-muted" title="Minimum cart value required to use this coupon"></i>
+              </label>
+              <input type="number" 
+                     name="min_order_value" 
+                     class="form-control form-control-lg" 
+                     placeholder="0"
+                     value="{{ coupon.min_order_value if coupon else '0' }}"
+                     min="0">
+              <div class="form-text">Leave 0 for no minimum order requirement</div>
+            </div>
+
+            <!-- Usage Limits -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                  Maximum Total Uses
+                  <i class="bi bi-info-circle text-muted" title="Total times this coupon can be used by all customers"></i>
+                </label>
+                <input type="number" 
+                       name="max_uses" 
+                       class="form-control form-control-lg" 
+                       placeholder="Unlimited"
+                       value="{{ coupon.max_uses if coupon and coupon.max_uses else '' }}"
+                       min="1">
+                <div class="form-text">Leave empty for unlimited uses</div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Expiry Date</label>
+                <input type="date" 
+                       name="expires_at" 
+                       class="form-control form-control-lg" 
+                       value="{{ coupon.expires_at.strftime('%Y-%m-%d') if coupon and coupon.expires_at else '' }}"
+                       min="{{ now.strftime('%Y-%m-%d') }}">
+                <div class="form-text">Leave empty for no expiry</div>
+              </div>
+            </div>
+
+            <!-- Preview Box -->
+            <div class="alert alert-info border-0" style="border-left: 4px solid #0dcaf0 !important;">
+              <h6 class="fw-bold mb-2">
+                <i class="bi bi-eye me-2"></i>Coupon Preview
+              </h6>
+              <div id="couponPreview" class="p-3 bg-white rounded">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="fw-bold fs-4 text-primary" id="previewCode">COUPON CODE</div>
+                    <div class="text-muted small" id="previewDescription">Get discount on your order</div>
+                  </div>
+                  <div class="text-end">
+                    <div class="fs-3 fw-bold text-success" id="previewDiscount">20% OFF</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-check-circle me-2"></i>
+                {% if coupon %}Update Coupon{% else %}Create Coupon{% endif %}
+              </button>
+              <a href="{{ url_for('admin_coupons') }}" class="btn btn-outline-secondary btn-lg px-4">
+                Cancel
+              </a>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      {% if coupon %}
+      <!-- Usage Statistics -->
+      <div class="card border-0 shadow-sm mt-4">
+        <div class="card-body">
+          <h5 class="fw-bold mb-3">
+            <i class="bi bi-graph-up me-2"></i>Usage Statistics
+          </h5>
+          <div class="row text-center">
+            <div class="col-4">
+              <div class="p-3">
+                <div class="display-6 fw-bold text-primary">{{ coupon.times_used }}</div>
+                <div class="text-muted small">Times Used</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3">
+                <div class="display-6 fw-bold text-success">
+                  {% if coupon.max_uses %}
+                    {{ ((coupon.times_used / coupon.max_uses * 100)|int) }}%
+                  {% else %}
+                    -
+                  {% endif %}
+                </div>
+                <div class="text-muted small">Usage Rate</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="p-3">
+                <div class="display-6 fw-bold {% if coupon.is_active %}text-success{% else %}text-danger{% endif %}">
+                  {% if coupon.is_active %}Active{% else %}Inactive{% endif %}
+                </div>
+                <div class="text-muted small">Status</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const discountType = document.getElementById('discountType');
+  const discountSymbol = document.getElementById('discountSymbol');
+  const discountHint = document.getElementById('discountHint');
+  const discountValue = document.querySelector('[name="discount_value"]');
+  const couponCode = document.querySelector('[name="code"]');
+  const minOrder = document.querySelector('[name="min_order_value"]');
+  
+  const previewCode = document.getElementById('previewCode');
+  const previewDiscount = document.getElementById('previewDiscount');
+  const previewDescription = document.getElementById('previewDescription');
+
+  // Auto-uppercase coupon code
+  couponCode.addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    updatePreview();
+  });
+
+  // Update discount type
+  discountType.addEventListener('change', function() {
+    updateDiscountType();
+    updatePreview();
+  });
+
+  discountValue.addEventListener('input', updatePreview);
+  minOrder.addEventListener('input', updatePreview);
+
+  function updateDiscountType() {
+    if (discountType.value === 'percentage') {
+      discountSymbol.textContent = '%';
+      discountHint.textContent = 'Customer gets ' + (discountValue.value || '20') + '% off their order';
+      discountValue.placeholder = '20';
+      discountValue.max = '100';
+    } else {
+      discountSymbol.textContent = '₹';
+      discountHint.textContent = 'Customer gets ₹' + (discountValue.value || '100') + ' off their order';
+      discountValue.placeholder = '100';
+      discountValue.removeAttribute('max');
+    }
+  }
+
+  function updatePreview() {
+    // Update code
+    const code = couponCode.value || 'COUPONCODE';
+    previewCode.textContent = code;
+    
+    // Update discount
+    const value = discountValue.value || (discountType.value === 'percentage' ? '20' : '100');
+    if (discountType.value === 'percentage') {
+      previewDiscount.textContent = value + '% OFF';
+    } else {
+      previewDiscount.textContent = '₹' + value + ' OFF';
+    }
+    
+    // Update description
+    const minVal = parseInt(minOrder.value) || 0;
+    if (minVal > 0) {
+      previewDescription.textContent = `Get discount on orders above ₹${minVal}`;
+    } else {
+      previewDescription.textContent = 'Get discount on your order';
+    }
+  }
+
+  // Initialize
+  updateDiscountType();
+  updatePreview();
+});
+</script>
+
+<style>
+  input[type="text"][name="code"] {
+    font-family: 'Courier New', monospace;
+  }
+  
+  #couponPreview {
+    border: 2px dashed #dee2e6;
+  }
+</style>
+{% endblock %}

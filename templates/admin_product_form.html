@@ -353,9 +353,9 @@ function closeModalAndFinish(){
     cropModalInstance.hide();
   }
   
+  // FORCE REMOVE ALL BACKDROPS
   setTimeout(()=>{
-    const backdrop=document.querySelector('.modal-backdrop');
-    if(backdrop) backdrop.remove();
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
     document.body.classList.remove('modal-open');
     document.body.style.overflow='';
     document.body.style.paddingRight='';
@@ -365,20 +365,21 @@ function closeModalAndFinish(){
     input.value='';
     imagesToProcess=[];
     currentProcessIndex=0;
-  },300);
+  }, 300);
 }
-
-document.getElementById('cropModal').addEventListener('hidden.bs.modal',function(){
+document.getElementById('cropModal').addEventListener('hidden.bs.modal', function(){
   if(cropper){
     cropper.destroy();
     cropper=null;
   }
   
-  const backdrop=document.querySelector('.modal-backdrop');
-  if(backdrop) backdrop.remove();
-  document.body.classList.remove('modal-open');
-  document.body.style.overflow='';
-  document.body.style.paddingRight='';
+  // FORCE CLEANUP
+  setTimeout(() => {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow='';
+    document.body.style.paddingRight='';
+  }, 100);
   
   imagesToProcess=[];
   currentProcessIndex=0;
@@ -698,6 +699,10 @@ document.getElementById('productForm').addEventListener('submit',function(e){
 
 // CRITICAL: Load existing variants on page load
 document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow='';
+  document.body.style.paddingRight='';
   // Initialize all images first
   updateAllImages();
   

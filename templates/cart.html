@@ -29,25 +29,35 @@
                   <!-- Info -->
                   <div class="flex-grow-1">
                     <h6 class="mb-1">{{ item.product.name }}</h6>
+                    {% if item.color_variant or item.size_variant %}
+                      <p class="small text-muted mb-0">
+                        {% if item.color_variant %}
+                          <span class="badge bg-secondary">{{ item.color_variant.name }}</span>
+                        {% endif %}
+                        {% if item.size_variant %}
+                          <span class="badge bg-secondary">{{ item.size_variant.name }}</span>
+                        {% endif %}
+                     </p>
+                    {% endif %}
                     <p class="small text-muted mb-1">
                       {{ item.product.description[:60] }}{% if item.product.description and item.product.description|length > 60 %}...{% endif %}
                     </p>
-                    <p class="mb-0 fw-semibold">₹{{ item.product.price }}</p>
+                    <p class="mb-0 fw-bold">₹{{ item.effective_price * item.quantity }}</p>
                   </div>
 
                   <!-- Quantity + line total -->
                   <div class="text-end" style="min-width: 120px;">
                     <div class="d-inline-flex align-items-center mb-1">
-  <a href="{{ url_for('decrease_quantity', product_id=item.product.id) }}"
+  <a href="{{ url_for('decrease_quantity', product_id=item.cart_key) }}"
      class="btn btn-sm btn-outline-secondary">-</a>
   <span class="mx-2">{{ item.quantity }}</span>
-  <a href="{{ url_for('increase_quantity', product_id=item.product.id) }}"
+  <a href="{{ url_for('increase_quantity', product_id=item.cart_key) }}"
      class="btn btn-sm btn-outline-secondary">+</a>
 </div>
 <p class="mb-0 small text-muted">
   Line total: ₹{{ item.product.price * item.quantity }}
 </p>
-<a href="{{ url_for('remove_from_cart', product_id=item.product.id) }}"
+<a href="{{ url_for('remove_from_cart', product_id=item.cart_key) }}"
    class="btn btn-link text-danger small p-0 mt-1">
   Remove
 </a>
