@@ -758,36 +758,7 @@ def create_order():
         "key": RAZORPAY_KEY_ID
     })
 
-@app.route("/validate_coupon", methods=["POST"])
-def validate_coupon():
-    data = request.get_json()
-    code = data.get("code", "").strip().upper()
-    cart_total = int(data.get("cart_total", 0))
-    
-    if not code:
-        return jsonify({"valid": False, "message": "Please enter a coupon code"})
-    
-    coupon = Coupon.query.filter_by(code=code).first()
-    
-    if not coupon:
-        return jsonify({"valid": False, "message": "Invalid coupon code"})
-    
-    is_valid, message = coupon.is_valid(cart_total)
-    
-    if not is_valid:
-        return jsonify({"valid": False, "message": message})
-    
-    discount = coupon.calculate_discount(cart_total)
-    new_total = cart_total - discount
-    
-    return jsonify({
-        "valid": True,
-        "message": f"Coupon '{code}' applied successfully!",
-        "discount": discount,
-        "new_total": new_total,
-        "discount_type": coupon.discount_type,
-        "discount_value": coupon.discount_value
-    })
+
 
 @app.route("/verify_payment", methods=["POST"])
 def verify_payment():
@@ -1349,6 +1320,33 @@ def checkout():
         city = request.form.get("city")
         pincode = request.form.get("pincode")
         notes = request.form.get("notes")
+        
+        # Handle coupon
+        coupon_code = request.form.get("coupon_code", "").strip().upper()
+        coupon_discount = 0
+        
+        # Get gift wraps
+        import json
+        gift_wraps_json = request.form.get("gift_wraps", "{}")
+        gift_wraps = {}
+        try:
+            gift_wraps = json.loads(gift_wraps_json)
+        except:
+            pass
+        
+        wrap_total = sum(wrap.get('price', 0) for wrap in gift_wraps.values())
+        subtotal = total + wrap_total
+        
+        # Validate coupon
+        if coupon_code:
+            coupon = Coupon.query.filter_by(code=coupon_code).first()
+            if coupon:
+                is_valid, message = coupon.is_valid(subtotal)
+                if is_valid:
+                    coupon_discount = coupon.calculate_discount(subtotal)
+                    coupon.times_used += 1
+        
+        final_total = subtotal - coupon_discount
 
         order = Order(
             customer_name=customer_name,
@@ -1358,14 +1356,17 @@ def checkout():
             city=city,
             pincode=pincode,
             notes=notes,
-            total_amount=total,
+            subtotal=subtotal,
+            coupon_code=coupon_code if coupon_discount > 0 else None,
+            coupon_discount=coupon_discount,
+            total_amount=final_total,
         )
 
         db.session.add(order)
         db.session.flush()
 
         for item in items:
-            effective_price = item["product"].sale_price if item["product"].sale_price else item["product"].price
+            effective_price = item["effective_price"]
             oi = OrderItem(
                 order_id=order.id,
                 product_id=item["product"].id,
@@ -1376,36 +1377,25 @@ def checkout():
                 size_variant_name=item["size_variant"].name if item["size_variant"] else None
             )
             db.session.add(oi)
+            db.session.flush()
+            
+            # Handle gift wraps
+            product_id_str = str(item["product"].id)
+            if product_id_str in gift_wraps:
+                wrap_data = gift_wraps[product_id_str]
+                db.session.add(GiftWrap(
+                    order_item_id=oi.id,
+                    wrap_type=wrap_data.get('type'),
+                    wrap_price=wrap_data.get('price')
+                ))
 
         db.session.commit()
         session["cart"] = {}
 
-        print(">>> ABOUT TO SEND SMS FOR ORDER", order.id)
-
-        try:
-            client = Client(account_sid, auth_token)
-            message_body = (
-                f"KCX Crochet order #{order.id} | ₹{total} | "
-                f"{customer_name}, {phone}, {city} {pincode}"
-            )
-
-            TWILIO_FROM_NUMBER = os.getenv("TWILIO_FROM_NUMBER")
-            ADMIN_PHONE_NUMBER = os.getenv("ADMIN_PHONE_NUMBER")
-
-            client.messages.create(
-                body=message_body,
-                from_=TWILIO_FROM_NUMBER,
-                to=ADMIN_PHONE_NUMBER,
-            )
-
-            print("SMS Sent Successfully!")
-
-        except Exception as e:
-            print("SMS FAILED:", e)
-
         return redirect(url_for("order_success", order_id=order.id))
 
     return render_template("checkout.html", cart_items=items, total=total, count=count)
+
 
 @app.route("/checkout_ajax", methods=["POST"])
 def checkout_ajax():
@@ -1422,17 +1412,6 @@ def checkout_ajax():
     pincode = request.form.get("pincode") or ""
     notes = request.form.get("notes") or ""
     
-    coupon_code = request.form.get("coupon_code", "").strip().upper()
-    coupon_discount = 0
-    
-    if coupon_code:
-        coupon = Coupon.query.filter_by(code=coupon_code).first()
-        if coupon:
-            is_valid, message = coupon.is_valid(total)
-            if is_valid:
-                coupon_discount = coupon.calculate_discount(total)
-                coupon.times_used += 1
-
     # Get gift wrap data
     import json
     gift_wraps_json = request.form.get("gift_wraps", "{}")
@@ -1443,11 +1422,31 @@ def checkout_ajax():
     except Exception as e:
         print(f"ERROR parsing gift wraps: {e}")
     
+    # Handle coupon
+    coupon_code = request.form.get("coupon_code", "").strip().upper()
+    coupon_discount = 0
+
     # Calculate total with gift wraps
     wrap_total = sum(wrap.get('price', 0) for wrap in gift_wraps.values())
-    final_total = total + wrap_total - coupon_discount
-    
-    print(f"DEBUG: Items total: ₹{total}, Wrap total: ₹{wrap_total}, Final: ₹{final_total}")
+    subtotal = total + wrap_total
+
+    # Validate and apply coupon
+    if coupon_code:
+        coupon = Coupon.query.filter_by(code=coupon_code).first()
+        if coupon:
+            is_valid, message = coupon.is_valid(subtotal)
+            if is_valid:
+                coupon_discount = coupon.calculate_discount(subtotal)
+                coupon.times_used += 1
+                print(f"✓ Coupon '{coupon_code}' applied! Discount: ₹{coupon_discount}")
+            else:
+                print(f"✗ Coupon validation failed: {message}")
+        else:
+            print(f"✗ Coupon '{coupon_code}' not found")
+
+    final_total = subtotal - coupon_discount
+
+    print(f"DEBUG: Subtotal: ₹{subtotal}, Discount: ₹{coupon_discount}, Final: ₹{final_total}")
 
     order = Order(
         customer_name=customer_name,
@@ -1457,9 +1456,9 @@ def checkout_ajax():
         city=city,
         pincode=pincode,
         notes=notes,
-        subtotal=subtotal,  
-        coupon_code=coupon_code if coupon_discount > 0 else None,  
-        coupon_discount=coupon_discount,  
+        subtotal=subtotal,
+        coupon_code=coupon_code if coupon_discount > 0 else None,
+        coupon_discount=coupon_discount,
         total_amount=final_total,
         payment_status="Unpaid",
         status="Pending"
@@ -1473,7 +1472,7 @@ def checkout_ajax():
     for it in items:
         prod = it["product"]
         qty = it["quantity"]
-        effective_price = it["effective_price"]  # Includes variant adjustments
+        effective_price = it["effective_price"]
         
         oi = OrderItem(
             order_id=order.id,
@@ -1507,6 +1506,72 @@ def checkout_ajax():
     print(f"DEBUG: Order {order.id} committed successfully\n")
 
     return jsonify({"order_id": order.id, "total": final_total})
+
+@app.route("/validate_coupon", methods=["POST"])
+def validate_coupon():
+    data = request.get_json()
+    code = data.get("code", "").strip().upper()
+    cart_total = int(data.get("cart_total", 0))
+    
+    if not code:
+        return jsonify({"valid": False, "message": "Please enter a coupon code"})
+    
+    coupon = Coupon.query.filter_by(code=code).first()
+    
+    if not coupon:
+        return jsonify({"valid": False, "message": "Invalid coupon code"})
+    
+    is_valid, message = coupon.is_valid(cart_total)
+    
+    if not is_valid:
+        return jsonify({"valid": False, "message": message})
+    
+    discount = coupon.calculate_discount(cart_total)
+    new_total = cart_total - discount
+    
+    return jsonify({
+        "valid": True,
+        "message": f"Coupon '{code}' applied successfully!",
+        "discount": discount,
+        "new_total": new_total,
+        "discount_type": coupon.discount_type,
+        "discount_value": coupon.discount_value
+    })
+    
+    # Check if coupon exists
+    if code not in coupons:
+        print(f"DEBUG: Invalid coupon code '{code}'")
+        return jsonify({
+            "valid": False, 
+            "message": "Invalid coupon code"
+        })
+    
+    coupon = coupons[code]
+    
+    # Check minimum order requirement
+    if cart_total < coupon["min_order"]:
+        print(f"DEBUG: Cart total ₹{cart_total} below minimum ₹{coupon['min_order']}")
+        return jsonify({
+            "valid": False, 
+            "message": f"Minimum order of ₹{coupon['min_order']} required for this coupon"
+        })
+    
+    # Calculate discount
+    if coupon["type"] == "percentage":
+        discount = int(cart_total * coupon["value"] / 100)
+    else:
+        discount = coupon["value"]
+    
+    # Cap discount at cart total
+    discount = min(discount, cart_total)
+    
+    print(f"DEBUG: Coupon '{code}' applied! Discount: ₹{discount}")
+    
+    return jsonify({
+        "valid": True,
+        "discount": discount,
+        "message": f"🎉 You saved ₹{discount}!"
+    })
 
 # ----- CATEGORY MANAGEMENT ROUTES -----
 
