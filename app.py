@@ -91,6 +91,8 @@ class Product(db.Model):
     image_url = db.Column(db.String(255))
     is_bestseller = db.Column(db.Boolean, default=False)
     category = db.Column(db.String(50))
+    time_to_make_min = db.Column(db.Integer, nullable=True)  
+    time_to_make_max = db.Column(db.Integer, nullable=True) 
     
     # NEW FIELDS
     is_new_launch = db.Column(db.Boolean, default=False)
@@ -922,6 +924,8 @@ def admin_product_add():
         
         sale_price_str = request.form.get("sale_price", "").strip()
         sale_price = int(sale_price_str) if sale_price_str else None
+        time_min = request.form.get("time_min", "").strip()
+        time_max = request.form.get("time_max", "").strip()
 
         p = Product(
             name=name,
@@ -932,7 +936,9 @@ def admin_product_add():
             is_new_launch=is_new_launch,
             new_launch_date=new_launch_date,
             category=category,
-            sale_price=sale_price
+            sale_price=sale_price,
+            time_to_make_min=int(time_min) if time_min else None,  
+            time_to_make_max=int(time_max) if time_max else None 
         )
         db.session.add(p)
         db.session.commit()
@@ -1023,6 +1029,10 @@ def admin_product_edit(product_id):
         
         sale_price_str = request.form.get("sale_price", "").strip()
         product.sale_price = int(sale_price_str) if sale_price_str else None
+        time_min = request.form.get("time_min", "").strip()
+        time_max = request.form.get("time_max", "").strip()
+        product.time_to_make_min = int(time_min) if time_min else None
+        product.time_to_make_max = int(time_max) if time_max else None
 
         # Handle image order
         image_order_json = request.form.get("image_order", "")

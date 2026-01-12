@@ -1,20 +1,19 @@
-from app import app, db, Product
-from datetime import datetime
+import sqlite3
 
-with app.app_context():
-    # Add the new column
-    with db.engine.connect() as conn:
-        try:
-            conn.execute(db.text('ALTER TABLE product ADD COLUMN new_launch_date DATETIME'))
-            conn.commit()
-            print("✓ Column added successfully!")
-        except Exception as e:
-            print(f"Column might already exist: {e}")
-    
-    # Set current date for existing new launches
-    products = Product.query.filter_by(is_new_launch=True).all()
-    for p in products:
-        if not p.new_launch_date:
-            p.new_launch_date = datetime.utcnow()
-    db.commit()
-    print(f"✓ Updated {len(products)} existing new launch products")
+# Connect to database
+conn = sqlite3.connect('store.db')
+cursor = conn.cursor()
+
+try:
+    # Add new columns
+    cursor.execute('ALTER TABLE product ADD COLUMN time_to_make_min INTEGER')
+    cursor.execute('ALTER TABLE product ADD COLUMN time_to_make_max INTEGER')
+    conn.commit()
+    print("✓ Database updated successfully!")
+except sqlite3.OperationalError as e:
+    if "duplicate column name" in str(e):
+        print("✓ Columns already exist!")
+    else:
+        print(f"✗ Error: {e}")
+finally:
+    conn.close()

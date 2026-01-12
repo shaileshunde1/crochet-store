@@ -136,6 +136,30 @@
           <label class="form-label fw-semibold">Sale Price (Optional)</label>
           <input name="sale_price" type="number" class="form-control form-control-lg" value="{{ product.sale_price if product and product.sale_price else '' }}" placeholder="Leave empty if not on sale">
         </div>
+        
+        <!-- Time to Make -->
+<div class="mb-4">
+  <label class="form-label fw-semibold">
+    <i class="bi bi-clock-history"></i> Time to Make (Hours)
+  </label>
+  <div class="row g-2">
+    <div class="col-md-6">
+      <input name="time_min" type="number" class="form-control" 
+             value="{{ product.time_to_make_min if product and product.time_to_make_min else '' }}" 
+             placeholder="Min hours (e.g., 36)" min="1">
+      <small class="text-muted">Minimum hours</small>
+    </div>
+    <div class="col-md-6">
+      <input name="time_max" type="number" class="form-control" 
+             value="{{ product.time_to_make_max if product and product.time_to_make_max else '' }}" 
+             placeholder="Max hours (e.g., 72)" min="1">
+      <small class="text-muted">Maximum hours</small>
+    </div>
+  </div>
+  <div class="form-text">
+    <i class="bi bi-info-circle"></i> Leave empty if not applicable. This helps customers understand the crafting time.
+  </div>
+</div>
 
         <div class="mb-4">
           <label class="form-label fw-semibold d-block mb-3">Product Tags</label>

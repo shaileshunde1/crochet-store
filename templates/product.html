@@ -91,6 +91,27 @@
           {% endif %}
         </div>
 
+        <!-- Time to Make Display -->
+{% if product.time_to_make_min or product.time_to_make_max %}
+<div class="mb-4">
+  <div class="d-flex align-items-center gap-2 text-muted">
+    <i class="bi bi-clock-history fs-5"></i>
+    <div>
+      <small class="d-block fw-semibold">Maker’s Hours</small>
+      <span class="fw-bold text-dark">
+        {% if product.time_to_make_min and product.time_to_make_max %}
+          {{ product.time_to_make_min }}-{{ product.time_to_make_max }} hours
+        {% elif product.time_to_make_min %}
+          ~{{ product.time_to_make_min }} hours
+        {% else %}
+          ~{{ product.time_to_make_max }} hours
+        {% endif %}
+      </span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
         <!-- COLOR VARIANTS -->
         <div id="colorVariantsSection" class="mb-4" style="display: none;">
           <label class="form-label fw-semibold mb-3">
