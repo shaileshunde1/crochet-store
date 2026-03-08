@@ -1,7 +1,6 @@
 from flask import Flask, render_template, session, redirect, url_for, request, make_response, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from twilio.rest import Client
 import csv
 import os
 from werkzeug.utils import secure_filename
@@ -75,12 +74,6 @@ class Category(db.Model):
     
     def __repr__(self):
         return f"<Category {self.name}>"
-
-# ---- Twilio SMS Config (local dev only) ----
-account_sid = os.getenv("TWILIO_ACCOUNT_SID")
-auth_token = os.getenv("TWILIO_AUTH_TOKEN")           
-client = Client(account_sid, auth_token)
-
 
 # --- MODELS ---
 class Product(db.Model):
@@ -1829,5 +1822,6 @@ with app.app_context():
         print("✓ Default categories initialized")
     
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
