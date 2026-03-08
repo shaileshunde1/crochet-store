@@ -1,598 +1,231 @@
 {% extends "base.html" %}
 
-{% block title %}Shop | KCX Crochet{% endblock %}
+{% block title %}Shop | KCX Crochet Store{% endblock %}
 
 {% block content %}
-
-<section class="py-5" style="background: linear-gradient(180deg, #FFF8F4 0%, #FFFFFF 100%);">
-  <div class="container">
-
-    <!-- Header Section -->
-    <div class="header-section mb-5">
-      <div class="row align-items-center">
-        <div class="col-lg-8">
-          <h1 class="display-5 fw-bold mb-2" style="color: #8B6F47;">
-            {% if selected_category %}
-              {{ selected_category }}
-            {% else %}
-              Handcrafted Collection
-            {% endif %}
-          </h1>
-          <p class="text-muted lead mb-0">
-            {% if selected_category %}
-              Explore our {{ selected_category }} collection
-            {% else %}
-              Discover unique handmade crochet pieces
-            {% endif %}
-          </p>
+<!-- Shop Header -->
+<section class="section-padding bg-warm">
+    <div class="container">
+        <div class="shop-header-editorial text-center">
+            <nav class="breadcrumb-minimal mb-3">
+                <span class="location-tag">KCX Studio</span>
+                <span class="divider">/</span>
+                <span class="craft-tag">
+                    {% if selected_category %}{{ selected_category }}{% else %}Archive{% endif %}
+                </span>
+            </nav>
+            <h1 class="hero-title">
+                {% if selected_category %}
+                    {{ selected_category }} <span class="italic-serif">Edition.</span>
+                {% else %}
+                    The <span class="italic-serif">Collection.</span>
+                {% endif %}
+            </h1>
+            <p class="hero-description mx-auto">
+                Explore a curated selection of hand-knitted essentials. Each piece is crafted with patience and precision, designed to bring a touch of tactile warmth to your daily life.
+            </p>
         </div>
-        
-        <!-- Category Filter -->
-        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-          <div class="dropdown d-inline-block">
-            <button class="btn btn-filter dropdown-toggle" type="button" id="categoryFilter" data-bs-toggle="dropdown">
-              <i class="bi bi-funnel me-2"></i> Filter by Category
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li>
-                <a class="dropdown-item {% if not selected_category %}active{% endif %}" href="/shop">
-                  <i class="bi bi-grid-3x3-gap"></i> All Products
+    </div>
+</section>
+
+<!-- Shop Navigation -->
+<section class="filter-section border-bottom">
+    <div class="container">
+        <div class="filter-wrapper justify-content-center">
+            <div class="category-nav-scroll">
+                <a href="/shop" class="category-filter-link {% if not selected_category %}active{% endif %}">
+                    All Pieces
                 </a>
-              </li>
-              <li><hr class="dropdown-divider"></li>
-              {% for category in categories_global %}
-              <li>
-                <a class="dropdown-item {% if selected_category == category %}active{% endif %}" 
-                   href="/shop?category={{ category }}">
-                  <i class="bi bi-tag"></i> {{ category }}
+                {% for category in categories_global %}
+                <a href="/shop?category={{ category }}" class="category-filter-link {% if selected_category == category %}active{% endif %}">
+                    {{ category }}
                 </a>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
+                {% endfor %}
+            </div>
         </div>
-      </div>
     </div>
+</section>
 
-    <!-- Category Pills -->
-    <div class="category-pills mb-5">
-      <div class="pills-container">
-        <a href="/shop" class="category-pill {% if not selected_category %}active{% endif %}">
-          All Products
-        </a>
-        {% for category in categories_global %}
-        <a href="/shop?category={{ category }}" 
-           class="category-pill {% if selected_category == category %}active{% endif %}">
-          {{ category }}
-        </a>
-        {% endfor %}
-      </div>
-    </div>
+<!-- Product Listing -->
+<section class="section-padding">
+    <div class="container">
+        {% if products %}
+            <div class="product-minimal-grid">
+                {% for product in products %}
+                <div class="product-item">
+                    <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link">
+                        <div class="product-image-wrapper">
+                            {% if product.image_url %}
+                                <img src="{{ url_for('static', filename=product.image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                            {% elif product.images and product.images|length > 0 %}
+                                <img src="{{ url_for('static', filename=product.images[0].image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="product-placeholder">No Image</div>
+                            {% endif %}
+                            
+                            <!-- Hover Images Cycle -->
+                            {% if product.images and product.images|length > 1 %}
+                                {% for img in product.images[1:4] %}
+                                    <img src="{{ url_for('static', filename=img.image_url) }}" class="product-img-hover" style="display: none;">
+                                {% endfor %}
+                            {% endif %}
 
-    <!-- Products Grid -->
-    {% if products %}
-      <div class="products-grid">
-        {% for product in products %}
-          <div class="product-card-wrapper">
-            <a href="{{ url_for('product_detail', product_id=product.id) }}" class="text-decoration-none">
-              <div class="product-card">
-                
-                <!-- Image Container -->
-                <div class="product-image-wrapper">
-                  {% if product.image_url %}
-                    <img src="{{ url_for('static', filename=product.image_url) }}" 
-                         class="main-product-image" 
-                         alt="{{ product.name }}">
-                    
-                    {% if product.images and product.images|length > 1 %}
-                      {% for img in product.images[1:4] %}
-                        <img src="{{ url_for('static', filename=img.image_url) }}" 
-                             class="hover-product-image" 
-                             alt="{{ product.name }}">
-                      {% endfor %}
-                    {% endif %}
-                  {% elif product.images %}
-                    <img src="{{ url_for('static', filename=product.images[0].image_url) }}" 
-                         class="main-product-image" 
-                         alt="{{ product.name }}">
-                    
-                    {% if product.images|length > 1 %}
-                      {% for img in product.images[1:4] %}
-                        <img src="{{ url_for('static', filename=img.image_url) }}" 
-                             class="hover-product-image" 
-                             alt="{{ product.name }}">
-                      {% endfor %}
-                    {% endif %}
-                  {% else %}
-                    <div class="no-image-placeholder">
-                      <i class="bi bi-image"></i>
-                      <span>No Image</span>
-                    </div>
-                  {% endif %}
-                  
-                  <!-- Badges -->
-                  <div class="badge-container-left">
-                    {% if product.is_bestseller %}
-                      <span class="product-badge bestseller">
-                        <i class="bi bi-star-fill"></i> Bestseller
-                      </span>
-                    {% endif %}
-                    {% if product.is_new_launch %}
-                      <span class="product-badge new-launch">
-                        <i class="bi bi-sparkles"></i> New
-                      </span>
-                    {% endif %}
-                  </div>
-                  
-                  {% if product.sale_price %}
-                    <div class="badge-container-right">
-                      <span class="product-badge sale">
-                        <i class="bi bi-lightning-fill"></i> Sale
-                      </span>
-                    </div>
-                  {% endif %}
-                  
-                  <!-- Quick Add Overlay -->
-                  <div class="quick-add-overlay">
-                    <a href="/add/{{ product.id }}" class="btn btn-add-cart" onclick="event.stopPropagation();">
-                      <i class="bi bi-bag-plus"></i> Add to Cart
+                            <!-- Discreet Badges -->
+                            <div class="badge-stack">
+                                {% if product.is_bestseller %}
+                                    <span class="tag-minimal">Bestseller</span>
+                                {% endif %}
+                                {% if product.is_new_launch %}
+                                    <span class="tag-minimal">New</span>
+                                {% endif %}
+                                {% if product.sale_price %}
+                                    <span class="tag-minimal sale">Sale</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="quick-add-overlay">
+                                <a href="/add/{{ product.id }}" class="btn-quick-add" onclick="event.stopPropagation();">Quick Add +</a>
+                            </div>
+                        </div>
+                        <div class="product-info-minimal">
+                            <h3 class="product-name-minimal">{{ product.name }}</h3>
+                            <div class="product-price-minimal">
+                                {% if product.sale_price %}
+                                    <span class="price-old">₹{{ product.price }}</span>
+                                    <span class="price-new">₹{{ product.sale_price }}</span>
+                                {% else %}
+                                    <span class="price-current">₹{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </a>
-                  </div>
                 </div>
-
-                <!-- Product Info -->
-                <div class="product-info">
-                  <h3 class="product-title">{{ product.name }}</h3>
-                  
-                  {% if product.description %}
-                  <p class="product-description">
-                    {{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}
-                  </p>
-                  {% endif %}
-                  
-                  <div class="product-footer">
-                    <div class="product-price">
-                      {% if product.sale_price %}
-                        <span class="price-original">₹{{ product.price }}</span>
-                        <span class="price-sale">₹{{ product.sale_price }}</span>
-                        <span class="price-save">
-                          Save {{ ((product.price - product.sale_price) / product.price * 100) | round | int }}%
-                        </span>
-                      {% else %}
-                        <span class="price-regular">₹{{ product.price }}</span>
-                      {% endif %}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </a>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-icon">
-          <i class="bi bi-inbox"></i>
-        </div>
-        <h3>No products found</h3>
-        <p>
-          {% if selected_category %}
-            No products available in {{ selected_category }} yet
-          {% else %}
-            Check back soon for new handcrafted items
-          {% endif %}
-        </p>
-        <a href="/shop" class="btn btn-primary-custom">View All Products</a>
-      </div>
-    {% endif %}
-
-  </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-editorial">
+                <p class="italic-serif">The collection is currently resting.</p>
+                <p class="minimal-subheading">Check back soon for new handcrafted arrivals.</p>
+                <a href="/shop" class="text-link mt-4 d-inline-block text-dark">Back to Store</a>
+            </div>
+        {% endif %}
+    </div>
 </section>
 
 <style>
-/* Header Section */
-.header-section {
-  padding: 2rem 0;
-}
+    :root {
+        --text-main: #1a1a1a;
+        --text-muted: #666666;
+        --bg-warm: #fcfaf7;
+        --accent: #8b6f47;
+        --serif: 'Playfair Display', serif;
+        --sans: 'Inter', -apple-system, sans-serif;
+    }
 
-.btn-filter {
-  background: white;
-  border: 2px solid #E8DDD0;
-  color: #8B6F47;
-  padding: 0.75rem 1.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+    /* Layout General */
+    body { font-family: var(--sans); color: var(--text-main); }
+    .section-padding { padding: 6rem 0; }
+    .bg-warm { background-color: var(--bg-warm); }
+    .italic-serif { font-family: var(--serif); font-style: italic; font-weight: 400; }
 
-.btn-filter:hover {
-  background: #8B6F47;
-  border-color: #8B6F47;
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 111, 71, 0.25);
-}
+    /* Shop Header */
+    .breadcrumb-minimal { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); }
+    .breadcrumb-minimal .divider { margin: 0 10px; opacity: 0.3; }
+    .hero-title { font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; font-weight: 700; margin-bottom: 1.5rem; }
+    .hero-description { font-size: 1.05rem; line-height: 1.6; color: var(--text-muted); max-width: 550px; }
 
-/* Category Pills */
-.category-pills {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
+    /* Filters Section */
+    .filter-section { background: white; position: sticky; top: 0; z-index: 100; }
+    .filter-wrapper { display: flex; align-items: center; padding: 1.5rem 0; }
+    
+    .category-nav-scroll { display: flex; gap: 2rem; overflow-x: auto; scrollbar-width: none; }
+    .category-nav-scroll::-webkit-scrollbar { display: none; }
+    
+    .category-filter-link { 
+        text-decoration: none; color: var(--text-muted); font-size: 0.8rem; 
+        text-transform: uppercase; letter-spacing: 0.15em; font-weight: 600; 
+        white-space: nowrap; transition: 0.3s; padding-bottom: 4px; border-bottom: 1px solid transparent;
+    }
+    .category-filter-link:hover, .category-filter-link.active { color: var(--text-main); border-bottom-color: var(--text-main); }
 
-.category-pills::-webkit-scrollbar {
-  display: none;
-}
+    /* Product Grid */
+    .product-minimal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3rem 1.5rem; }
+    .product-item { transition: transform 0.4s ease; }
+    .product-link { text-decoration: none; color: inherit; }
+    
+    .product-image-wrapper { 
+        position: relative; aspect-ratio: 1/1; background: #f7f7f7; overflow: hidden; margin-bottom: 1.25rem;
+    }
+    .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .product-item:hover .product-img-main { transform: scale(1.05); }
 
-.pills-container {
-  display: flex;
-  gap: 0.75rem;
-  padding-bottom: 0.5rem;
-  flex-wrap: wrap;
-}
+    .badge-stack { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 5px; }
+    .tag-minimal { 
+        background: white; padding: 4px 10px; font-size: 0.65rem; text-transform: uppercase; 
+        letter-spacing: 0.1em; font-weight: 700; border-radius: 2px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .tag-minimal.sale { color: #c0392b; }
 
-.category-pill {
-  display: inline-block;
-  padding: 0.6rem 1.5rem;
-  background: white;
-  color: #6B5847;
-  text-decoration: none;
-  border-radius: 50px;
-  font-weight: 500;
-  font-size: 0.95rem;
-  border: 2px solid #E8DDD0;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
+    .quick-add-overlay { 
+        position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; 
+        background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+        transform: translateY(100%); transition: transform 0.3s; display: flex; justify-content: center;
+    }
+    .product-item:hover .quick-add-overlay { transform: translateY(0); }
+    .btn-quick-add { 
+        background: var(--text-main); color: white; padding: 10px 20px; font-size: 0.75rem; 
+        text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; border-radius: 2px;
+    }
 
-.category-pill:hover {
-  background: #F5EDE0;
-  border-color: #D4C4B0;
-  transform: translateY(-2px);
-}
+    .product-info-minimal { text-align: center; }
+    .product-name-minimal { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
+    .product-price-minimal { font-size: 0.9rem; letter-spacing: 0.05em; }
+    .price-old { text-decoration: line-through; color: var(--text-muted); margin-right: 8px; font-size: 0.8rem; }
+    .price-new { color: #c0392b; font-weight: 600; }
 
-.category-pill.active {
-  background: #8B6F47;
-  color: white;
-  border-color: #8B6F47;
-  box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
-}
+    .empty-state-editorial { text-align: center; padding: 4rem 0; }
+    .empty-state-editorial p { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .text-link { color: var(--text-main); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 2px; }
 
-/* Products Grid */
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 2rem;
-}
-
-@media (max-width: 768px) {
-  .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-  }
-}
-
-/* Product Card */
-.product-card {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 32px rgba(139, 111, 71, 0.15);
-}
-
-/* Image Wrapper */
-.product-image-wrapper {
-  position: relative;
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: #F8F6F3;
-}
-
-.main-product-image,
-.hover-product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: opacity 0.3s ease;
-}
-
-.hover-product-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  display: none;
-}
-
-.product-card:hover .hover-product-image {
-  display: block;
-}
-
-.no-image-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #C4B5A0;
-  font-size: 3rem;
-}
-
-.no-image-placeholder span {
-  font-size: 1rem;
-  margin-top: 0.5rem;
-}
-
-/* Badges */
-.badge-container-left,
-.badge-container-right {
-  position: absolute;
-  top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  z-index: 2;
-}
-
-.badge-container-left { left: 12px; }
-.badge-container-right { right: 12px; }
-
-.product-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.product-badge.bestseller {
-  background: rgba(220, 53, 69, 0.95);
-  color: white;
-}
-
-.product-badge.new-launch {
-  background: rgba(76, 175, 80, 0.95);
-  color: white;
-}
-
-.product-badge.sale {
-  background: rgba(255, 107, 107, 0.95);
-  color: white;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-/* Quick Add Overlay */
-.quick-add-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1rem;
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-}
-
-.product-card:hover .quick-add-overlay {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.btn-add-cart {
-  width: 100%;
-  background: white;
-  color: #8B6F47;
-  border: none;
-  padding: 0.75rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-}
-
-.btn-add-cart:hover {
-  background: #8B6F47;
-  color: white;
-  transform: scale(1.05);
-}
-
-/* Product Info */
-.product-info {
-  padding: 1.25rem;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.product-title {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2C2416;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-
-.product-description {
-  font-size: 0.85rem;
-  color: #8B7D6B;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-  flex-grow: 1;
-}
-
-.product-footer {
-  margin-top: auto;
-}
-
-.product-price {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.price-regular {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #8B6F47;
-}
-
-.price-original {
-  font-size: 0.9rem;
-  color: #A09283;
-  text-decoration: line-through;
-}
-
-.price-sale {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #FF6B6B;
-}
-
-.price-save {
-  font-size: 0.75rem;
-  background: #FFF3E0;
-  color: #F57C00;
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-/* Dropdown */
-.dropdown-menu {
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  border: 1px solid #E8DDD0;
-  padding: 0.5rem;
-  min-width: 200px;
-}
-
-.dropdown-item {
-  border-radius: 8px;
-  padding: 0.6rem 1rem;
-  transition: all 0.2s;
-  color: #6B5847;
-  font-weight: 500;
-}
-
-.dropdown-item i {
-  width: 20px;
-  margin-right: 8px;
-}
-
-.dropdown-item:hover {
-  background: #F5EDE0;
-  color: #8B6F47;
-  transform: translateX(4px);
-}
-
-.dropdown-item.active {
-  background: #8B6F47;
-  color: white;
-}
-
-/* Empty State */
-.empty-state {
-  text-align: center;
-  padding: 5rem 2rem;
-}
-
-.empty-icon {
-  font-size: 5rem;
-  color: #D4C4B0;
-  margin-bottom: 1.5rem;
-}
-
-.empty-state h3 {
-  color: #6B5847;
-  margin-bottom: 1rem;
-  font-weight: 600;
-}
-
-.empty-state p {
-  color: #A09283;
-  margin-bottom: 2rem;
-}
-
-.btn-primary-custom {
-  background: #8B6F47;
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s;
-}
-
-.btn-primary-custom:hover {
-  background: #6D5638;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 111, 71, 0.3);
-}
+    /* Responsive */
+    @media (max-width: 992px) {
+        .product-minimal-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
+        .filter-wrapper { padding: 1rem 0; }
+        .section-padding { padding: 4rem 0; }
+    }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const productCards = document.querySelectorAll('.product-card');
-  
-  productCards.forEach(card => {
-    const container = card.querySelector('.product-image-wrapper');
-    if (!container) return;
-    
-    const mainImage = container.querySelector('.main-product-image');
-    const hoverImages = container.querySelectorAll('.hover-product-image');
-    
-    if (hoverImages.length === 0) return;
-    
-    let currentImageIndex = 0;
-    let intervalId = null;
-    
-    card.addEventListener('mouseenter', function() {
-      currentImageIndex = 0;
-      
-      intervalId = setInterval(() => {
-        hoverImages.forEach((img, idx) => {
-          img.style.opacity = idx === currentImageIndex ? '1' : '0';
-        });
+    const productItems = document.querySelectorAll('.product-item');
+    productItems.forEach(item => {
+        const mainImg = item.querySelector('.product-img-main');
+        const hoverImages = item.querySelectorAll('.product-img-hover');
         
-        currentImageIndex = (currentImageIndex + 1) % hoverImages.length;
-      }, 800);
+        if (hoverImages.length === 0) return;
+
+        let cycleInterval;
+        let currentIndex = -1;
+
+        item.addEventListener('mouseenter', () => {
+            cycleInterval = setInterval(() => {
+                if (currentIndex === -1) {
+                    mainImg.style.display = 'none';
+                } else {
+                    hoverImages[currentIndex].style.display = 'none';
+                }
+                currentIndex = (currentIndex + 1) % hoverImages.length;
+                hoverImages[currentIndex].style.display = 'block';
+            }, 1000);
+        });
+
+        item.addEventListener('mouseleave', () => {
+            clearInterval(cycleInterval);
+            hoverImages.forEach(img => img.style.display = 'none');
+            mainImg.style.display = 'block';
+            currentIndex = -1;
+        });
     });
-    
-    card.addEventListener('mouseleave', function() {
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
-      
-      hoverImages.forEach(img => {
-        img.style.opacity = '0';
-      });
-      currentImageIndex = 0;
-    });
-  });
 });
 </script>
-
 {% endblock %}

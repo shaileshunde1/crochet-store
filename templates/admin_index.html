@@ -3,71 +3,217 @@
 {% block title %}Admin Dashboard | KCX Crochet{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold">Admin Dashboard</h2>
-    <div>
-      <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-secondary">Logout</a>
+<!-- Mobile Admin Navigation (Bottom Fixed) -->
+<div class="admin-mobile-nav d-md-none">
+    <div class="d-flex justify-content-around align-items-center py-2">
+        <a href="{{ url_for('admin_index') }}" class="nav-item active">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('admin_orders') }}" class="nav-item">
+            <i class="bi bi-box-seam"></i>
+            <span>Orders</span>
+        </a>
+        <a href="{{ url_for('admin_products') }}" class="nav-item">
+            <i class="bi bi-bag-heart"></i>
+            <span>Products</span>
+        </a>
+        <a href="{{ url_for('shop') }}" class="nav-item">
+            <i class="bi bi-shop"></i>
+            <span>Store</span>
+        </a>
     </div>
-  </div>
-
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="text-muted">Orders</h6>
-          <div class="d-flex align-items-end justify-content-between">
-            <div>
-              <h3 class="mb-0">{{ orders_count }}</h3>
-              <div class="small text-muted">Total orders</div>
-            </div>
-            <div>
-              <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-dark">View orders</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="text-muted">Products</h6>
-          <div class="d-flex align-items-end justify-content-between">
-            <div>
-              <h3 class="mb-0">{{ products_count }}</h3>
-              <div class="small text-muted">Total products</div>
-            </div>
-            <div>
-              <a href="{{ url_for('admin_products') }}" class="btn btn-sm btn-dark">Manage products</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h6 class="text-muted">Today</h6>
-          <div class="d-flex align-items-end justify-content-between">
-            <div>
-              <h3 class="mb-0">{{ todays_count }}</h3>
-              <div class="small text-muted">Orders today</div>
-            </div>
-            <div>
-              <a href="{{ url_for('admin_orders') }}?filter=today" class="btn btn-sm btn-outline-dark">Today</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-3">
-    <a href="{{ url_for('admin_products') }}" class="btn btn-outline-dark me-2">Products</a>
-    <a href="{{ url_for('admin_orders') }}" class="btn btn-dark me-2">Orders</a>
-    <a href="{{ url_for('admin_orders_export') }}" class="btn btn-outline-secondary">Export CSV</a>
-  </div>
 </div>
+
+<div class="container py-4 py-md-5 mb-5 mb-md-0">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 border-bottom pb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-0">Management Console</h2>
+            <p class="text-muted mb-0">Overview and control of KCX Crochet Store</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('shop') }}" class="btn btn-sm btn-outline-dark flex-grow-1 flex-md-grow-0">
+                <i class="bi bi-eye me-1"></i> View Store
+            </a>
+            <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-danger px-3 flex-grow-1 flex-md-grow-0">
+                <i class="bi bi-power me-1"></i> Logout
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="row g-3 g-md-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-dark text-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="text-uppercase extra-small opacity-75 fw-bold mb-2 mb-md-3">Total Orders</h6>
+                    <h2 class="fw-bold mb-0">{{ orders_count }}</h2>
+                    <div class="mt-2 extra-small opacity-50 d-none d-md-block"><i class="bi bi-clock"></i> All time history</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="text-uppercase extra-small text-muted fw-bold mb-2 mb-md-3">Products</h6>
+                    <h2 class="fw-bold mb-0">{{ products_count }}</h2>
+                    <div class="mt-2 extra-small text-success d-none d-md-block"><i class="bi bi-check-circle"></i> Live in archive</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="text-uppercase extra-small text-muted fw-bold mb-2 mb-md-3">Today</h6>
+                    <h2 class="fw-bold mb-0">{{ todays_count }}</h2>
+                    <div class="mt-2 extra-small text-primary d-none d-md-block"><i class="bi bi-graph-up"></i> Recent activity</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white d-flex align-items-center justify-content-center p-2 p-md-4">
+                <a href="{{ url_for('admin_orders_export') }}" class="btn btn-sm btn-outline-secondary w-100 py-md-2">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> <span class="d-none d-md-inline">Export</span> CSV
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Modules Grid -->
+    <h5 class="fw-bold mb-4 text-uppercase small letter-spacing-2">Administration Modules</h5>
+    <div class="row g-3 g-md-4 mb-5">
+        <!-- Products Module -->
+        <div class="col-md-4">
+            <div class="module-card card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3">
+                        <i class="bi bi-bag-heart"></i>
+                    </div>
+                    <h5 class="fw-bold">Inventory</h5>
+                    <p class="text-muted small">Manage crochet pieces, variants, prices, and high-quality gallery images.</p>
+                    <a href="{{ url_for('admin_products') }}" class="btn btn-sm btn-dark w-100 mt-2">Manage Products</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Module -->
+        <div class="col-md-4">
+            <div class="module-card card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3 bg-primary-soft text-primary">
+                        <i class="bi bi-box-seam"></i>
+                    </div>
+                    <h5 class="fw-bold">Orders & Fulfillment</h5>
+                    <p class="text-muted small">Track pending shipments, update delivery status, and view customer details.</p>
+                    <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-dark w-100 mt-2">View Orders</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories Module -->
+        <div class="col-md-4">
+            <div class="module-card card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3 bg-info-soft text-info">
+                        <i class="bi bi-tags"></i>
+                    </div>
+                    <h5 class="fw-bold">Product Categories</h5>
+                    <p class="text-muted small">Organize your store by adding or editing product collections and types.</p>
+                    <a href="{{ url_for('admin_categories') }}" class="btn btn-sm btn-dark w-100 mt-2">Manage Categories</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coupons Module -->
+        <div class="col-md-4">
+            <div class="module-card card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3 bg-warning-soft text-warning">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <h5 class="fw-bold">Discounts & Coupons</h5>
+                    <p class="text-muted small">Create promotional codes, seasonal discounts, and monitor usage rates.</p>
+                    <a href="{{ url_for('admin_coupons') }}" class="btn btn-sm btn-dark w-100 mt-2">Coupon Settings</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Module -->
+        <div class="col-md-4">
+            <div class="module-card card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3 bg-success-soft text-success">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <h5 class="fw-bold">Kind Words (Reviews)</h5>
+                    <p class="text-muted small">Moderate customer feedback, approve testimonials, and respond to stories.</p>
+                    <a href="{{ url_for('admin_reviews') }}" class="btn btn-sm btn-dark w-100 mt-2">Moderate Feedback</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .letter-spacing-2 { letter-spacing: 0.1em; }
+    .extra-small { font-size: 0.65rem; }
+    .module-card { transition: transform 0.3s ease, box-shadow 0.3s ease; border-radius: 12px; }
+    .module-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; }
+    
+    .module-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Mobile Admin Bottom Nav */
+    .admin-mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-top: 1px solid #eee;
+        z-index: 1050;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .admin-mobile-nav .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #888;
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .admin-mobile-nav .nav-item i {
+        font-size: 1.25rem;
+        margin-bottom: 2px;
+    }
+    .admin-mobile-nav .nav-item.active {
+        color: #1a1a1a;
+    }
+
+    .bg-primary-soft { background: #e7f1ff; }
+    .bg-info-soft { background: #e0f7fa; }
+    .bg-warning-soft { background: #fff8e1; }
+    .bg-success-soft { background: #e8f5e9; }
+
+    .card h6 { letter-spacing: 0.05em; }
+
+    @media (max-width: 768px) {
+        .display-5 { font-size: 1.75rem; }
+        .module-card h5 { font-size: 1rem; }
+        .module-card p { font-size: 0.75rem; }
+    }
+</style>
 {% endblock %}

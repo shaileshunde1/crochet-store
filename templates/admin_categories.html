@@ -3,209 +3,232 @@
 {% block title %}Manage Categories | Admin{% endblock %}
 
 {% block content %}
-
-<style>
-.admin-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-</style>
-
-<div class="admin-container">
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="fw-bold mb-1">Manage Categories</h2>
-      <p class="text-muted mb-0">Add, remove, and reorder your product categories</p>
+<!-- Mobile Admin Navigation (Top Sticky/Fixed) -->
+<div class="admin-mobile-nav d-md-none">
+    <div class="d-flex justify-content-around align-items-center py-2">
+        <a href="{{ url_for('admin_index') }}" class="nav-item">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('admin_orders') }}" class="nav-item">
+            <i class="bi bi-box-seam"></i>
+            <span>Orders</span>
+        </a>
+        <a href="{{ url_for('admin_products') }}" class="nav-item">
+            <i class="bi bi-bag-heart"></i>
+            <span>Products</span>
+        </a>
+        <a href="{{ url_for('shop') }}" class="nav-item">
+            <i class="bi bi-shop"></i>
+            <span>Store</span>
+        </a>
     </div>
-    <a href="{{ url_for('admin_products') }}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left"></i> Back to Products
-    </a>
-  </div>
+</div>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container py-4 py-md-5 mt-5 mt-md-0">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 border-bottom pb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Manage Collections</h2>
+            <p class="text-muted mb-0">Organize and reorder your product categories</p>
         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <div class="row">
-    <!-- Add New Category Card -->
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body">
-          <h5 class="card-title mb-3">
-            <i class="bi bi-plus-circle text-success"></i> Add New Category
-          </h5>
-          <form method="POST" action="{{ url_for('admin_category_add') }}">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Category Name</label>
-              <input type="text" name="name" class="form-control form-control-lg" placeholder="e.g., Plushies" required>
-              <div class="form-text">Enter a unique category name</div>
-            </div>
-            <button type="submit" class="btn btn-success w-100">
-              <i class="bi bi-plus-lg"></i> Add Category
-            </button>
-          </form>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin_index') }}" class="btn btn-sm btn-outline-dark px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin_products') }}" class="btn btn-sm btn-dark px-3">
+                <i class="bi bi-bag me-1"></i> Products
+            </a>
         </div>
-      </div>
     </div>
 
-    <!-- Existing Categories -->
-    <div class="col-md-8">
-      <div class="card shadow-sm border-0">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="card-title mb-0">
-              <i class="bi bi-list-ul text-primary"></i> Existing Categories ({{ categories|length }})
-            </h5>
-            {% if categories %}
-            <span class="badge bg-info">
-              <i class="bi bi-arrows-move"></i> Drag to reorder
-            </span>
-            {% endif %}
-          </div>
-
-          {% if categories %}
-            <div id="categoriesList" class="list-group">
-              {% for category in categories %}
-              <div class="list-group-item category-item" data-category-id="{{ category.id }}" draggable="true">
-                <div class="d-flex align-items-center">
-                  <div class="drag-handle me-3">
-                    <i class="bi bi-grip-vertical fs-4 text-muted"></i>
-                  </div>
-                  <div class="flex-grow-1">
-                    <h6 class="mb-1 fw-bold">{{ category.name }}</h6>
-                    <small class="text-muted">Order: {{ loop.index }}</small>
-                  </div>
-                  <form method="POST" action="{{ url_for('admin_category_delete', category_id=category.id) }}" 
-                        onsubmit="return confirm('Delete category \'{{ category.name }}\'? This action cannot be undone.');"
-                        class="d-inline">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                      <i class="bi bi-trash"></i> Delete
-                    </button>
-                  </form>
+    <!-- Alert Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show rounded-1 mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
-              </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="text-center py-5">
-              <i class="bi bi-inbox display-1 text-muted"></i>
-              <p class="text-muted mt-3 mb-0">No categories yet. Add your first category to get started!</p>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-  <!-- Info Card -->
-  <div class="card border-0 bg-light mt-4">
-    <div class="card-body">
-      <h6 class="fw-bold mb-2"><i class="bi bi-info-circle text-info"></i> Category Management Tips</h6>
-      <ul class="mb-0 small">
-        <li>Categories help organize your products and improve navigation</li>
-        <li>Drag and drop to reorder categories - the order will be reflected on your website</li>
-        <li>Categories with products cannot be deleted - remove products from the category first</li>
-        <li>Category names should be clear and descriptive for customers</li>
-      </ul>
+    <div class="row g-4">
+        <!-- Add New Category Module -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="module-icon mb-3 bg-success-soft text-success">
+                        <i class="bi bi-plus-lg"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Add Collection</h5>
+                    <form method="POST" action="{{ url_for('admin_category_add') }}">
+                        <div class="mb-4">
+                            <label class="studio-label">Collection Name</label>
+                            <input type="text" name="name" class="form-control-minimal" placeholder="e.g., Seasonal Plushies" required>
+                            <div class="form-text extra-small mt-2">Choose a unique name that defines the group.</div>
+                        </div>
+                        <button type="submit" class="btn btn-editorial w-100 py-2">
+                            Add Category
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Existing Categories List -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Existing Categories ({{ categories|length }})</h5>
+                        {% if categories %}
+                        <span class="tag-minimal info d-none d-md-inline-block">
+                            <i class="bi bi-arrows-move me-1"></i> Drag to Reorder
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if categories %}
+                        <div id="categoriesList" class="category-archive-list">
+                            {% for category in categories %}
+                            <div class="category-item-editorial" data-category-id="{{ category.id }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="drag-handle">
+                                        <i class="bi bi-grip-vertical"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0 fw-bold">{{ category.name }}</h6>
+                                        <span class="extra-small text-muted text-uppercase fw-bold letter-spacing-1" id="order-label-{{ category.id }}">
+                                            Position: {{ loop.index }}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <form method="POST" action="{{ url_for('admin_category_delete', category_id=category.id) }}" 
+                                              onsubmit="return confirm('Delete collection \'{{ category.name }}\'?');">
+                                            <button type="submit" class="btn-icon-delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5 bg-warm rounded">
+                            <i class="bi bi-inbox display-4 text-muted mb-3 d-block"></i>
+                            <p class="text-muted mb-0 italic-serif">Your archive is currently empty.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pro Tips Card -->
+            <div class="card border-0 bg-warm mt-4">
+                <div class="card-body p-4">
+                    <h6 class="studio-label mb-3"><i class="bi bi-info-circle me-2"></i> Archive Guidelines</h6>
+                    <ul class="mb-0 small text-muted lh-lg">
+                        <li>The sequence here determines the order in your main store navigation.</li>
+                        <li>Drag items using the grip handle on the left to prioritize collections.</li>
+                        <li>Ensure a category is empty of products before attempting deletion.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 </div>
 
 <style>
-.admin-container {
-  max-width: 1200px;
-}
+    /* Admin General Styles */
+    .extra-small { font-size: 0.65rem; }
+    .letter-spacing-1 { letter-spacing: 0.1em; }
+    .italic-serif { font-style: italic; font-family: serif; }
+    .bg-warm { background-color: #fdfaf7; }
+    .bg-success-soft { background: #e8f5e9; }
+    
+    .studio-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; color: #888; margin-bottom: 0.5rem; display: block; }
+    .tag-minimal { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; letter-spacing: 0.1em; background: #e0f7fa; color: #00838f; }
 
-.category-item {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  margin-bottom: 0.75rem;
-  padding: 1rem;
-  background: white;
-  transition: all 0.2s;
-  cursor: move;
-}
+    /* Module Icon */
+    .module-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
 
-.category-item:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  transform: translateY(-2px);
-}
+    /* Custom Form Control */
+    .form-control-minimal { width: 100%; padding: 0.75rem 0; border: none; border-bottom: 1px solid #eee; background: transparent; border-radius: 0; outline: none; transition: 0.3s; }
+    .form-control-minimal:focus { border-bottom-color: #1a1a1a; }
 
-.category-item.dragging {
-  opacity: 0.5;
-  transform: scale(0.98);
-}
+    /* Category List Editorial */
+    .category-archive-list { display: flex; flex-direction: column; gap: 12px; }
+    .category-item-editorial { 
+        background: #fff; 
+        border: 1px solid #f1f1f1; 
+        padding: 1.25rem; 
+        border-radius: 8px; 
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        cursor: grab;
+    }
+    .category-item-editorial:hover { transform: translateX(5px); border-color: #1a1a1a; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+    .category-item-editorial.dragging { opacity: 0.4; cursor: grabbing; border: 1px dashed #1a1a1a; }
+    
+    .drag-handle { color: #ccc; cursor: grab; font-size: 1.2rem; }
+    .btn-icon-delete { background: none; border: none; color: #dc3545; opacity: 0.4; transition: 0.3s; }
+    .btn-icon-delete:hover { opacity: 1; transform: scale(1.1); }
 
-.drag-handle {
-  cursor: grab;
-}
+    /* Mobile Nav Styles */
+    .admin-mobile-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        z-index: 1050;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .admin-mobile-nav .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .admin-mobile-nav .nav-item i { font-size: 1.25rem; margin-bottom: 2px; }
+    .admin-mobile-nav .nav-item.active { color: #1a1a1a; }
 
-.drag-handle:active {
-  cursor: grabbing;
-}
-
-.list-group {
-  gap: 0;
-}
-
-.card {
-  border-radius: 12px;
-}
+    @media (max-width: 768px) {
+        .container.mt-5 { margin-top: 80px !important; }
+    }
 </style>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const categoriesList = document.getElementById('categoriesList');
-  
-  if (categoriesList) {
-    const sortable = new Sortable(categoriesList, {
-      animation: 150,
-      handle: '.drag-handle',
-      ghostClass: 'dragging',
-      onEnd: function(evt) {
-        // Get new order
-        const order = [];
-        document.querySelectorAll('.category-item').forEach(item => {
-          order.push(item.dataset.categoryId);
+    const categoriesList = document.getElementById('categoriesList');
+    
+    if (categoriesList) {
+        new Sortable(categoriesList, {
+            animation: 150,
+            handle: '.drag-handle',
+            ghostClass: 'dragging',
+            onEnd: function() {
+                const order = [];
+                document.querySelectorAll('.category-item-editorial').forEach(item => {
+                    order.push(item.dataset.categoryId);
+                });
+                
+                fetch('{{ url_for("admin_category_reorder") }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order: order })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelectorAll('.category-item-editorial').forEach((item, index) => {
+                            const label = document.getElementById(`order-label-${item.dataset.categoryId}`);
+                            if (label) label.textContent = `Position: ${index + 1}`;
+                        });
+                    }
+                })
+                .catch(err => console.error('Error reordering:', err));
+            }
         });
-        
-        // Send to server
-        fetch('{{ url_for("admin_category_reorder") }}', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ order: order })
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            // Update order numbers
-            document.querySelectorAll('.category-item').forEach((item, index) => {
-              const orderText = item.querySelector('small');
-              if (orderText) {
-                orderText.textContent = `Order: ${index + 1}`;
-              }
-            });
-          }
-        })
-        .catch(error => {
-          console.error('Error updating order:', error);
-          alert('Failed to update category order. Please refresh and try again.');
-        });
-      }
-    });
-  }
+    }
 });
 </script>
 {% endblock %}

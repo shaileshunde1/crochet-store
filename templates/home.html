@@ -3,595 +3,374 @@
 {% block title %}Home | KCX Crochet Store{% endblock %}
 
 {% block content %}
-
-<!-- Hero Section with Video -->
-<section class="hero-section">
-  <div class="container">
-    <div class="row align-items-center">
-      <div class="col-md-6 mb-4 mb-md-0">
-        <span class="badge bg-light text-dark mb-3">
-          Handmade with love in India
-        </span>
-        <h1 class="display-5 fw-bold mb-3">
-          Cozy Crochet Creations <span>❤️</span>
-        </h1>
-        <p class="lead text-muted mb-4">
-          Plushies, keychains, hair accessories and forever flowers –
-          all crafted to be the cutest gifts for your favourite people.
-        </p>
-        <a href="/shop" class="btn btn-dark btn-lg px-4">
-          Shop All Products
-        </a>
-      </div>
-      <div class="col-md-6">
-        <div class="hero-video-container shadow-sm">
-          <video 
-            class="hero-video"
-            autoplay 
-            loop 
-            muted 
-            playsinline
-          >
-            <source src="{{ url_for('static', filename='videos/pov.mp4') }}" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
+<!-- Modern Editorial Hero -->
+<section class="hero-editorial">
+    <div class="container">
+        <div class="hero-grid">
+            <div class="hero-text-content">
+                <nav class="breadcrumb-minimal mb-4">
+                    <span class="location-tag">Based in India</span>
+                    <span class="divider">/</span>
+                    <span class="craft-tag">Handmade Crochet</span>
+                </nav>
+                <h1 class="hero-title">
+                    The Art of <br>
+                    <span class="italic-serif">Slow Craft.</span>
+                </h1>
+                <p class="hero-description">
+                    Thoughtfully hand-knitted plushies, accessories, and forever flowers. 
+                    Made to be kept, gifted, and cherished.
+                </p>
+                <div class="hero-actions">
+                    <a href="/shop" class="btn-minimal">Explore Collection</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="video-frame">
+                    <div class="video-label">The Process — 01</div>
+                    <video autoplay loop muted playsinline class="editorial-video">
+                        <source src="{{ url_for('static', filename='videos/pov.mp4') }}" type="video/mp4">
+                    </video>
+                    <div class="frame-accent"></div>
+                    <div class="video-corner-text">Handcrafted <br> in KCX Studio</div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </section>
 
-<!-- Bestsellers Section -->
-<section class="py-4">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-end mb-3">
-      <div>
-        <h2 class="section-title">Our Bestsellers</h2>
-        <p class="section-subtitle">Customer favourites that sell out fast.</p>
-      </div>
-      <a href="/shop" class="small text-decoration-none">View all →</a>
-    </div>
+<!-- Minimalist Bestsellers -->
+<section class="section-padding">
+    <div class="container">
+        <div class="section-header-minimal">
+            <div class="header-left">
+                <h2 class="minimal-heading">Bestsellers</h2>
+                <p class="minimal-subheading">Our most loved creations.</p>
+            </div>
+            <a href="/shop" class="text-link">View All</a>
+        </div>
 
-    <div class="row g-3">
-      {% if products %}
-        {% for product in products %}
-          <div class="col-6 col-md-3">
-            <a href="/product/{{ product.id }}" class="text-decoration-none text-dark">
-              <div class="card border-0 shadow-sm product-card h-100">
-                <div class="position-relative product-image-container">
-                  
-                  <!-- FIXED: Safe image display with fallback -->
-                  {% if product.images and product.images|length > 0 %}
-                    <img
-                      src="{{ url_for('static', filename=product.images[0].image_url) }}"
-                      class="card-img-top main-product-image"
-                      alt="{{ product.name }}"
-                    >
-                  {% elif product.image_url %}
-                    <img
-                      src="{{ url_for('static', filename=product.image_url) }}"
-                      class="card-img-top main-product-image"
-                      alt="{{ product.name }}"
-                    >
-                  {% else %}
-                    <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
-                      <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-                    </div>
-                  {% endif %}
-                  
-                  <!-- Hidden images for hover effect -->
-                  {% if product.images and product.images|length > 1 %}
-                    {% for img in product.images[1:4] %}
-                      <img
-                        src="{{ url_for('static', filename=img.image_url) }}"
-                        class="card-img-top hover-product-image"
-                        alt="{{ product.name }}"
-                        style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;"
-                      >
-                    {% endfor %}
-                  {% endif %}
-                  
-                  <!-- Badges Container - Only Bestseller and New Launch -->
-                  <div class="position-absolute top-0 start-0 m-2 d-flex flex-column gap-1">
-                    {% if product.is_bestseller %}
-                      <span class="badge bg-danger">Bestseller</span>
-                    {% endif %}
-                    {% if product.is_new_launch %}
-                      <span class="badge" style="background-color: #4CAF50;">New Launch</span>
-                    {% endif %}
-                  </div>
-                  
-                  <!-- Sale Badge in top right -->
-                  {% if product.sale_price %}
-                    <span class="badge position-absolute top-0 end-0 m-2" style="background-color: #FF6B6B; font-size: 0.9rem;">
-                      SALE
-                    </span>
-                  {% endif %}
-                </div>
-                <div class="card-body">
-                  <h6 class="card-title mb-1">{{ product.name }}</h6>
-                  <p class="small text-muted mb-2">
-                    {{ product.description[:70] }}{% if product.description and product.description|length > 70 %}...{% endif %}
-                  </p>
-                  <div class="d-flex justify-content-between align-items-center">
-                    <!-- Price Display with Sale -->
-                    <div>
-                      {% if product.sale_price %}
-                        <div class="d-flex align-items-center gap-2">
-                          <span class="text-decoration-line-through text-muted small">₹{{ product.price }}</span>
-                          <span class="fw-bold" style="color: #FF6B6B;">₹{{ product.sale_price }}</span>
+        <div class="product-minimal-grid">
+            {% if products %}
+                {% for product in products %}
+                <div class="product-item">
+                    <a href="/product/{{ product.id }}" class="product-link">
+                        <div class="product-image-wrapper">
+                            {% if product.images and product.images|length > 0 %}
+                                <img src="{{ url_for('static', filename=product.images[0].image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                            {% elif product.image_url %}
+                                <img src="{{ url_for('static', filename=product.image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="product-placeholder">No Image</div>
+                            {% endif %}
+                            
+                            <!-- Hover Images Cycle -->
+                            {% if product.images and product.images|length > 1 %}
+                                {% for img in product.images[1:4] %}
+                                    <img src="{{ url_for('static', filename=img.image_url) }}" class="product-img-hover" style="display: none;">
+                                {% endfor %}
+                            {% endif %}
+
+                            <!-- Discreet Badges -->
+                            <div class="badge-stack">
+                                {% if product.is_bestseller %}
+                                    <span class="tag-minimal">Bestseller</span>
+                                {% endif %}
+                                {% if product.sale_price %}
+                                    <span class="tag-minimal sale">Sale</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="quick-add-overlay">
+                                <a href="/add/{{ product.id }}" class="btn-quick-add">Quick Add +</a>
+                            </div>
                         </div>
-                      {% else %}
-                        <span class="fw-semibold">₹{{ product.price }}</span>
-                      {% endif %}
-                    </div>
-                    <a href="/add/{{ product.id }}" class="btn btn-sm btn-outline-dark">
-                      Add to Cart
+                        <div class="product-info-minimal">
+                            <h3 class="product-name-minimal">{{ product.name }}</h3>
+                            <div class="product-price-minimal">
+                                {% if product.sale_price %}
+                                    <span class="price-old">₹{{ product.price }}</span>
+                                    <span class="price-new">₹{{ product.sale_price }}</span>
+                                {% else %}
+                                    <span class="price-current">₹{{ product.price }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </a>
-                  </div>
                 </div>
-              </div>
-            </a>
-          </div>
-        {% endfor %}
-      {% else %}
-        <p>No bestseller products yet.</p>
-      {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="empty-state">No products found.</p>
+            {% endif %}
+        </div>
     </div>
-  </div>
 </section>
 
-<!-- COMPACT CATEGORIES SECTION - Horizontal scroll with thumbnails -->
+<!-- Elevated Categories - Optimized for Mobile -->
 {% if category_products %}
-<section class="py-4 categories-preview-section">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-end mb-3">
-      <div>
-        <h2 class="section-title">Shop by Category</h2>
-        <p class="section-subtitle">Explore our handcrafted collections</p>
-      </div>
-    </div>
-
-    <div class="category-scroll-container">
-      {% for category, products in category_products.items() %}
-      <a href="/shop?category={{ category }}" class="category-card text-decoration-none">
-        <div class="category-thumbnail">
-          {% if products and products|length > 0 %}
-            <!-- FIXED: Safe image display -->
-            {% if products[0].images and products[0].images|length > 0 %}
-              <img src="{{ url_for('static', filename=products[0].images[0].image_url) }}" alt="{{ category }}">
-            {% elif products[0].image_url %}
-              <img src="{{ url_for('static', filename=products[0].image_url) }}" alt="{{ category }}">
-            {% else %}
-              <div class="bg-light d-flex align-items-center justify-content-center w-100 h-100">
-                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
-              </div>
-            {% endif %}
-          {% endif %}
-          <div class="category-overlay">
-            <h5 class="category-name">{{ category }}</h5>
-            <p class="category-count">{{ products|length }} items</p>
-          </div>
+<section class="section-padding bg-warm overflow-hidden">
+    <div class="container">
+        <div class="section-header-minimal mobile-compact">
+            <h2 class="minimal-heading">Curated Collections</h2>
+            <p class="minimal-subheading d-md-none">Swipe to explore →</p>
         </div>
-      </a>
-      {% endfor %}
+        
+        <div class="category-grid-editorial">
+            {% for category, products in category_products.items() %}
+            <a href="/shop?category={{ category }}" class="category-item-minimal">
+                <div class="category-image-frame">
+                    {% if products and products|length > 0 %}
+                        {% if products[0].images and products[0].images|length > 0 %}
+                            <img src="{{ url_for('static', filename=products[0].images[0].image_url) }}" alt="{{ category }}">
+                        {% elif products[0].image_url %}
+                            <img src="{{ url_for('static', filename=products[0].image_url) }}" alt="{{ category }}">
+                        {% endif %}
+                    {% endif %}
+                    <div class="category-content-overlay">
+                        <span class="item-count">{{ products|length }} Items</span>
+                        <h4 class="category-title-minimal">{{ category }}</h4>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
     </div>
-  </div>
 </section>
 {% endif %}
 
-<!-- Customer Reviews Section - DYNAMIC -->
+<!-- Clean Testimonials -->
 {% if recent_reviews and recent_reviews|length > 0 %}
-<section class="py-5" style="background-color: #f8f9fa;">
-  <div class="container">
-    <div class="text-center mb-5">
-      <h2 class="section-title">What Our Customers Say</h2>
-      <p class="section-subtitle">Real reviews from real customers ❤️</p>
-    </div>
-
-    <div class="reviews-carousel-wrapper position-relative">
-      <div class="reviews-carousel" id="reviewsCarousel">
-        {% for review in recent_reviews %}
-        <div class="review-card">
-          <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-            <div class="card-body p-4">
-              <div class="d-flex align-items-center mb-3">
-                <div class="review-avatar rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; font-size: 1.5rem; background: {{ ['#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6c757d'][loop.index0 % 6] }};">
-                  {{ review.customer_name[0].upper() }}
-                </div>
-                <div class="ms-3">
-                  <h6 class="mb-0 fw-bold">{{ review.customer_name }}</h6>
-                  <div class="text-warning">
-                    {% for i in range(review.rating) %}★{% endfor %}{% for i in range(5 - review.rating) %}☆{% endfor %}
-                  </div>
-                </div>
-              </div>
-              
-              <p class="text-muted mb-2" style="line-height: 1.8;">
-                "{{ review.review_text[:120] }}{% if review.review_text|length > 120 %}...{% endif %}"
-              </p>
-              
-              {% if review.image1_url or review.image2_url %}
-                <div class="d-flex gap-2 mb-2">
-                  {% if review.image1_url %}
-                    <img src="{{ url_for('static', filename=review.image1_url) }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                  {% endif %}
-                  {% if review.image2_url %}
-                    <img src="{{ url_for('static', filename=review.image2_url) }}" class="rounded" style="width: 60px; height: 60px; object-fit: cover;">
-                  {% endif %}
-                </div>
-              {% endif %}
-              
-              <small class="text-muted d-block mt-3">
-                <a href="{{ url_for('product_detail', product_id=review.product_id) }}" class="text-decoration-none">
-                  Purchased: {{ review.product.name }}
-                </a>
-              </small>
-            </div>
-          </div>
+<section class="section-padding">
+    <div class="container">
+        <div class="testimonial-header text-center mb-5">
+            <span class="kicker">Testimonials</span>
+            <h2 class="minimal-heading mt-2">Kind Words</h2>
         </div>
-        {% endfor %}
-      </div>
-      
-      <!-- Navigation Arrows -->
-      <button class="carousel-btn carousel-btn-prev" onclick="scrollReviews(-1)">
-        <i class="bi bi-chevron-left"></i>
-      </button>
-      <button class="carousel-btn carousel-btn-next" onclick="scrollReviews(1)">
-        <i class="bi bi-chevron-right"></i>
-      </button>
+        
+        <div class="testimonial-slider-minimal" id="reviewsCarousel">
+            {% for review in recent_reviews %}
+            <div class="testimonial-item">
+                <div class="testimonial-content">
+                    <div class="stars-minimal">
+                        {% for i in range(review.rating) %}<span>★</span>{% endfor %}
+                    </div>
+                    <p class="testimonial-text">"{{ review.review_text[:150] }}..."</p>
+                    <div class="testimonial-author">
+                        <span class="author-name">— {{ review.customer_name }}</span>
+                        <span class="author-product">on {{ review.product.name }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-
-    <div class="text-center mt-5">
-      <p class="text-muted mb-0">Join thousands of happy customers! ✨</p>
-    </div>
-  </div>
-</section>
-{% else %}
-<!-- Fallback: Show placeholder if no reviews yet -->
-<section class="py-5" style="background-color: #f8f9fa;">
-  <div class="container text-center">
-    <h2 class="section-title mb-3">What Our Customers Say</h2>
-    <p class="text-muted">Be the first to leave a review! ⭐</p>
-    <a href="{{ url_for('shop') }}" class="btn btn-primary mt-3">Shop Now</a>
-  </div>
 </section>
 {% endif %}
 
 <style>
-  /* Hero Section with Video */
-  .hero-section {
-    padding: 4rem 0 3rem 0;
-  }
-
-  .hero-video-container {
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    background: #000;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  }
-
-  .hero-video {
-    width: 100%;
-    height: auto;
-    display: block;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-  }
-
-  .section-title {
-    font-weight: 700;
-    font-size: 1.8rem;
-    margin-bottom: 0.25rem;
-  }
-  
-  .section-subtitle {
-    color: #6c757d;
-    font-size: 0.95rem;
-    margin: 0;
-  }
-  
-  /* FIXED PRODUCT CARD ASPECT RATIO */
-  .product-card {
-    transition: transform 0.2s;
-    height: 100%;
-  }
-  
-  .product-card:hover {
-    transform: translateY(-5px);
-  }
-  
-  .product-image-container {
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 1 / 1; /* FORCE SQUARE ASPECT RATIO */
-    background: #f8f9fa;
-  }
-  
-  .product-image-container img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* ENSURE IMAGES FILL THE SPACE */
-  }
-  
-  .main-product-image {
-    transition: opacity 0.3s ease;
-  }
-
-  /* Badge styling improvements */
-  .badge {
-    font-size: 0.75rem;
-    padding: 0.35rem 0.65rem;
-    font-weight: 600;
-    z-index: 10;
-  }
-
-  /* COMPACT CATEGORY SECTION - HORIZONTAL SCROLL */
-  .categories-preview-section {
-    background: linear-gradient(135deg, #FFF8F0 0%, #F5E6D3 100%);
-    padding: 3rem 0;
-  }
-
-  .category-scroll-container {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    padding: 1rem 0;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .category-scroll-container::-webkit-scrollbar {
-    height: 8px;
-  }
-
-  .category-scroll-container::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 10px;
-  }
-
-  .category-scroll-container::-webkit-scrollbar-thumb {
-    background: #8B6F47;
-    border-radius: 10px;
-  }
-
-  .category-card {
-    flex: 0 0 auto;
-    width: 280px;
-    transition: transform 0.3s ease;
-  }
-
-  .category-card:hover {
-    transform: translateY(-5px);
-  }
-
-  .category-thumbnail {
-    position: relative;
-    height: 220px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  }
-
-  .category-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  .category-card:hover .category-thumbnail img {
-    transform: scale(1.1);
-  }
-
-  .category-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
-    padding: 2rem 1.5rem 1.5rem;
-    color: white;
-  }
-
-  .category-name {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  }
-
-  .category-count {
-    font-size: 0.9rem;
-    margin: 0;
-    opacity: 0.9;
-  }
-
-  /* Reviews Carousel */
-  .reviews-carousel-wrapper {
-    position: relative;
-    padding: 0 50px;
-  }
-
-  .reviews-carousel {
-    display: flex;
-    gap: 1.5rem;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding: 1rem 0;
-  }
-
-  .reviews-carousel::-webkit-scrollbar {
-    display: none;
-  }
-
-  .review-card {
-    flex: 0 0 auto;
-    width: 350px;
-  }
-
-  .carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: white;
-    border: 2px solid #dee2e6;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    transition: all 0.3s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  .carousel-btn:hover {
-    background: #0d6efd;
-    color: white;
-    border-color: #0d6efd;
-    transform: translateY(-50%) scale(1.1);
-  }
-
-  .carousel-btn-prev {
-    left: 0;
-  }
-
-  .carousel-btn-next {
-    right: 0;
-  }
-
-  /* Responsive video */
-  @media (max-width: 768px) {
-    .hero-video-container {
-      margin-top: 2rem;
+    :root {
+        --text-main: #1a1a1a;
+        --text-muted: #666666;
+        --bg-warm: #fcfaf7;
+        --accent: #8b6f47;
+        --serif: 'Playfair Display', serif;
+        --sans: 'Inter', -apple-system, sans-serif;
     }
 
-    .category-card {
-      width: 220px;
-    }
+    /* Layout Reset/General */
+    body { font-family: var(--sans); color: var(--text-main); }
+    .section-padding { padding: 8rem 0; }
+    .bg-warm { background-color: var(--bg-warm); }
+    .italic-serif { font-family: var(--serif); font-style: italic; font-weight: 400; }
 
-    .category-thumbnail {
-      height: 180px;
-    }
-
-    .category-name {
-      font-size: 1.1rem;
-    }
-
-    .reviews-carousel-wrapper {
-      padding: 0 10px;
-    }
+    /* Hero Editorial */
+    .hero-editorial { padding: 6rem 0; min-height: 80vh; display: flex; align-items: center; }
+    .hero-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 4rem; align-items: center; }
     
-    .review-card {
-      width: 280px;
-    }
+    .breadcrumb-minimal { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); }
+    .breadcrumb-minimal .divider { margin: 0 10px; opacity: 0.3; }
     
-    .carousel-btn {
-      width: 35px;
-      height: 35px;
-      font-size: 0.9rem;
+    .hero-title { font-size: clamp(3rem, 6vw, 5rem); line-height: 1.1; font-weight: 700; margin-bottom: 2rem; }
+    .hero-description { font-size: 1.15rem; line-height: 1.6; color: var(--text-muted); max-width: 450px; margin-bottom: 2.5rem; }
+    
+    .btn-minimal { 
+        display: inline-block; padding: 1rem 2.5rem; border: 1px solid var(--text-main); 
+        color: var(--text-main); text-decoration: none; text-transform: uppercase; 
+        font-size: 0.8rem; letter-spacing: 0.2em; font-weight: 600; transition: all 0.4s;
     }
-  }
+    .btn-minimal:hover { background: var(--text-main); color: white; }
+
+    /* Enhanced Video Frame */
+    .video-frame { position: relative; border-radius: 4px; overflow: visible; background: #e0e0e0; }
+    .editorial-video { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 4px; display: block; }
+    .video-label { 
+        position: absolute; top: -30px; right: 0; font-size: 0.65rem; 
+        letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); 
+    }
+    .frame-accent { position: absolute; bottom: 20px; left: -25px; width: 80px; height: 1px; background: var(--text-main); z-index: 2; }
+    .video-corner-text { 
+        position: absolute; bottom: -15px; right: -15px; background: white; 
+        padding: 15px; font-size: 0.6rem; text-transform: uppercase; 
+        letter-spacing: 0.1em; line-height: 1.4; font-weight: 700; 
+        box-shadow: 10px 10px 30px rgba(0,0,0,0.05);
+    }
+
+    /* Product Grid */
+    .section-header-minimal { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4rem; }
+    .minimal-heading { font-size: 2.2rem; font-weight: 600; margin: 0; }
+    .minimal-subheading { color: var(--text-muted); margin-top: 0.5rem; }
+    .text-link { color: var(--text-main); text-decoration: none; font-size: 0.9rem; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 2px; transition: 0.3s; }
+    .text-link:hover { border-bottom-color: var(--text-main); }
+
+    .product-minimal-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2.5rem 1.5rem; }
+    .product-item { transition: transform 0.4s ease; }
+    .product-link { text-decoration: none; color: inherit; }
+    
+    .product-image-wrapper { 
+        position: relative; aspect-ratio: 1/1; background: #f7f7f7; overflow: hidden; margin-bottom: 1.25rem;
+    }
+    .product-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+    .product-item:hover .product-img-main { transform: scale(1.05); }
+
+    .badge-stack { position: absolute; top: 15px; left: 15px; display: flex; flex-direction: column; gap: 5px; }
+    .tag-minimal { 
+        background: white; padding: 4px 10px; font-size: 0.65rem; text-transform: uppercase; 
+        letter-spacing: 0.1em; font-weight: 700; border-radius: 2px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .tag-minimal.sale { color: #c0392b; }
+
+    .quick-add-overlay { 
+        position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; 
+        background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+        transform: translateY(100%); transition: transform 0.3s; display: flex; justify-content: center;
+    }
+    .product-item:hover .quick-add-overlay { transform: translateY(0); }
+    .btn-quick-add { 
+        background: var(--text-main); color: white; padding: 10px 20px; font-size: 0.75rem; 
+        text-transform: uppercase; letter-spacing: 0.1em; text-decoration: none; border-radius: 2px;
+    }
+
+    .product-info-minimal { text-align: center; }
+    .product-name-minimal { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.4rem; }
+    .product-price-minimal { font-size: 0.9rem; letter-spacing: 0.05em; }
+    .price-old { text-decoration: line-through; color: var(--text-muted); margin-right: 8px; font-size: 0.8rem; }
+    .price-new { color: #c0392b; font-weight: 600; }
+
+    /* Category Grid */
+    .category-grid-editorial { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .category-item-minimal { position: relative; text-decoration: none; color: white; overflow: hidden; border-radius: 4px; }
+    .category-image-frame { position: relative; aspect-ratio: 4/5; }
+    .category-image-frame img { width: 100%; height: 100%; object-fit: cover; transition: 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+    .category-content-overlay { 
+        position: absolute; inset: 0; padding: 2.5rem; display: flex; flex-direction: column; 
+        justify-content: flex-end; background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+    }
+    .category-title-minimal { font-family: var(--serif); font-size: 1.8rem; margin: 0; }
+    .item-count { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.5rem; opacity: 0.8; }
+    .category-item-minimal:hover img { transform: scale(1.08); }
+
+    /* Testimonials */
+    .testimonial-header .kicker { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.3em; color: var(--accent); font-weight: 700; }
+    .testimonial-slider-minimal { display: flex; gap: 3rem; overflow-x: auto; scrollbar-width: none; padding: 2rem 0; }
+    .testimonial-slider-minimal::-webkit-scrollbar { display: none; }
+    .testimonial-item { flex: 0 0 500px; background: var(--bg-warm); padding: 3rem; border-radius: 4px; }
+    .stars-minimal { color: var(--accent); font-size: 0.8rem; margin-bottom: 1.5rem; }
+    .testimonial-text { font-size: 1.2rem; line-height: 1.8; font-family: var(--serif); font-style: italic; color: var(--text-main); margin-bottom: 2rem; }
+    .testimonial-author { display: flex; flex-direction: column; }
+    .author-name { font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+    .author-product { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+        .section-padding { padding: 5rem 0; }
+        .hero-grid { grid-template-columns: 1fr; gap: 4rem; text-align: center; }
+        .hero-text-content { order: 2; }
+        .hero-visual { order: 1; max-width: 400px; margin: 0 auto; width: 90%; }
+        .hero-description { margin: 0 auto 2.5rem; }
+        
+        .product-minimal-grid { grid-template-columns: repeat(2, 1fr); gap: 2rem 1rem; }
+        
+        /* Category Mobile Horizontal Scroll */
+        .category-grid-editorial { 
+            display: flex; 
+            overflow-x: auto; 
+            scroll-snap-type: x mandatory;
+            gap: 1rem;
+            padding-bottom: 1.5rem;
+            margin: 0 -15px; /* Bleed to edge */
+            padding-left: 15px;
+            padding-right: 15px;
+            scrollbar-width: none;
+        }
+        .category-grid-editorial::-webkit-scrollbar { display: none; }
+        .category-item-minimal { flex: 0 0 75vw; scroll-snap-align: center; }
+        .category-title-minimal { font-size: 1.4rem; }
+        .category-content-overlay { padding: 1.5rem; }
+        
+        .testimonial-item { flex: 0 0 85vw; padding: 2rem; }
+        .testimonial-text { font-size: 1rem; }
+        
+        .video-corner-text { right: -5px; bottom: -5px; padding: 10px; }
+    }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const productCards = document.querySelectorAll('.product-card');
-  
-  productCards.forEach(card => {
-    const container = card.querySelector('.product-image-container');
-    if (!container) return;
-    
-    const hoverImages = container.querySelectorAll('.hover-product-image');
-    
-    if (hoverImages.length === 0) return;
-    
-    let currentImageIndex = 0;
-    let intervalId = null;
-    
-    // Start cycling through images on hover
-    card.addEventListener('mouseenter', function() {
-      currentImageIndex = 0;
-      
-      intervalId = setInterval(() => {
-        // Hide all hover images
-        hoverImages.forEach(img => img.style.display = 'none');
+    // Elegant Hover Image Cycle
+    const productItems = document.querySelectorAll('.product-item');
+    productItems.forEach(item => {
+        const wrapper = item.querySelector('.product-image-wrapper');
+        const mainImg = item.querySelector('.product-img-main');
+        const hoverImages = item.querySelectorAll('.product-img-hover');
         
-        // Show current hover image
-        if (hoverImages[currentImageIndex]) {
-          hoverImages[currentImageIndex].style.display = 'block';
-        }
-        
-        // Move to next image
-        currentImageIndex = (currentImageIndex + 1) % hoverImages.length;
-      }, 800); // Change image every 800ms
-    });
-    
-    // Stop cycling and reset on mouse leave
-    card.addEventListener('mouseleave', function() {
-      if (intervalId) {
-        clearInterval(intervalId);
-        intervalId = null;
-      }
-      
-      // Hide all hover images
-      hoverImages.forEach(img => img.style.display = 'none');
-      currentImageIndex = 0;
-    });
-  });
+        if (hoverImages.length === 0) return;
 
-  // Reviews Carousel Auto-scroll
-  let reviewsCarousel = document.getElementById('reviewsCarousel');
-  let autoScrollInterval;
+        let cycleInterval;
+        let currentIndex = -1;
 
-  function scrollReviews(direction) {
-    if (!reviewsCarousel) return;
-    const scrollAmount = 370; // Card width + gap
-    reviewsCarousel.scrollBy({
-      left: direction * scrollAmount,
-      behavior: 'smooth'
-    });
-  }
+        item.addEventListener('mouseenter', () => {
+            cycleInterval = setInterval(() => {
+                if (currentIndex === -1) {
+                    mainImg.style.display = 'none';
+                } else {
+                    hoverImages[currentIndex].style.display = 'none';
+                }
+                
+                currentIndex = (currentIndex + 1) % hoverImages.length;
+                hoverImages[currentIndex].style.display = 'block';
+            }, 1000);
+        });
 
-  // Make scrollReviews global for onclick handlers
-  window.scrollReviews = scrollReviews;
+        item.addEventListener('mouseleave', () => {
+            clearInterval(cycleInterval);
+            hoverImages.forEach(img => img.style.display = 'none');
+            mainImg.style.display = 'block';
+            currentIndex = -1;
+        });
+    });
 
-  // Auto-scroll every 4 seconds
-  if (reviewsCarousel && reviewsCarousel.children.length > 0) {
-    autoScrollInterval = setInterval(() => {
-      const maxScroll = reviewsCarousel.scrollWidth - reviewsCarousel.clientWidth;
-      
-      if (reviewsCarousel.scrollLeft >= maxScroll) {
-        // Reset to start
-        reviewsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        scrollReviews(1);
-      }
-    }, 4000);
-    
-    // Pause auto-scroll on hover
-    reviewsCarousel.addEventListener('mouseenter', () => {
-      clearInterval(autoScrollInterval);
-    });
-    
-    reviewsCarousel.addEventListener('mouseleave', () => {
-      autoScrollInterval = setInterval(() => {
-        const maxScroll = reviewsCarousel.scrollWidth - reviewsCarousel.clientWidth;
-        if (reviewsCarousel.scrollLeft >= maxScroll) {
-          reviewsCarousel.scrollTo({ left: 0, behavior: 'smooth' });
-        } else {
-          scrollReviews(1);
-        }
-      }, 4000);
-    });
-  }
+    // Simple Horizontal Scroll Drag for Reviews
+    const slider = document.getElementById('reviewsCarousel');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    if(slider) {
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave', () => isDown = false);
+        slider.addEventListener('mouseup', () => isDown = false);
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2;
+            slider.scrollLeft = scrollLeft - walk;
+        });
+    }
 });
 </script>
-
 {% endblock %}

@@ -3,240 +3,282 @@
 {% block title %}Manage Coupons | Admin{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="fw-bold mb-1">Coupon Management</h2>
-      <p class="text-muted mb-0">Create and manage discount coupons</p>
+<!-- Mobile Admin Navigation (Top Sticky/Fixed) -->
+<div class="admin-mobile-nav d-md-none">
+    <div class="d-flex justify-content-around align-items-center py-2">
+        <a href="{{ url_for('admin_index') }}" class="nav-item">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('admin_orders') }}" class="nav-item">
+            <i class="bi bi-box-seam"></i>
+            <span>Orders</span>
+        </a>
+        <a href="{{ url_for('admin_products') }}" class="nav-item">
+            <i class="bi bi-bag-heart"></i>
+            <span>Products</span>
+        </a>
+        <a href="{{ url_for('shop') }}" class="nav-item">
+            <i class="bi bi-shop"></i>
+            <span>Store</span>
+        </a>
     </div>
-    <a href="{{ url_for('admin_coupon_add') }}" class="btn btn-primary btn-lg">
-      <i class="bi bi-plus-circle"></i> Create New Coupon
-    </a>
-  </div>
+</div>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container py-4 py-md-5 mt-5 mt-md-0">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 border-bottom pb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Coupon Management</h2>
+            <p class="text-muted mb-0">Monitor and create promotional incentives</p>
         </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
-
-  <!-- Summary Cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Total Coupons</h6>
-              <h3 class="mb-0 fw-bold">{{ coupons|length }}</h3>
-            </div>
-            <div class="bg-primary bg-opacity-10 p-3 rounded">
-              <i class="bi bi-ticket-perforated fs-3 text-primary"></i>
-            </div>
-          </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin_index') }}" class="btn btn-sm btn-outline-dark px-3">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+            </a>
+            <a href="{{ url_for('admin_coupon_add') }}" class="btn btn-sm btn-dark px-3">
+                <i class="bi bi-plus-lg me-1"></i> Create Coupon
+            </a>
         </div>
-      </div>
-    </div>
-
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Active Coupons</h6>
-              <h3 class="mb-0 fw-bold text-success">
-                {{ coupons|selectattr('is_active', 'equalto', true)|list|length }}
-              </h3>
-            </div>
-            <div class="bg-success bg-opacity-10 p-3 rounded">
-              <i class="bi bi-check-circle fs-3 text-success"></i>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Inactive Coupons</h6>
-              <h3 class="mb-0 fw-bold text-danger">
-                {{ coupons|selectattr('is_active', 'equalto', false)|list|length }}
-              </h3>
+    <!-- Alert Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show rounded-1 mb-4" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Summary Stats -->
+    <div class="row g-3 g-md-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="studio-label mb-2">Total Issued</h6>
+                    <h3 class="fw-bold mb-0">{{ coupons|length }}</h3>
+                </div>
             </div>
-            <div class="bg-danger bg-opacity-10 p-3 rounded">
-              <i class="bi bi-x-circle fs-3 text-danger"></i>
-            </div>
-          </div>
         </div>
-      </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="studio-label mb-2 text-success">Active Now</h6>
+                    <h3 class="fw-bold mb-0 text-success">
+                        {{ coupons|selectattr('is_active', 'equalto', true)|list|length }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="studio-label mb-2 text-danger">Inactive</h6>
+                    <h3 class="fw-bold mb-0 text-danger">
+                        {{ coupons|selectattr('is_active', 'equalto', false)|list|length }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card shadow-sm border-0 h-100 bg-dark text-white">
+                <div class="card-body p-3 p-md-4">
+                    <h6 class="studio-label mb-2 opacity-75">Total Redemptions</h6>
+                    <h3 class="fw-bold mb-0">{{ coupons|sum(attribute='times_used') }}</h3>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-3">
-      <div class="card border-0 shadow-sm">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-muted mb-1">Total Uses</h6>
-              <h3 class="mb-0 fw-bold text-info">
-                {{ coupons|sum(attribute='times_used') }}
-              </h3>
-            </div>
-            <div class="bg-info bg-opacity-10 p-3 rounded">
-              <i class="bi bi-graph-up fs-3 text-info"></i>
-            </div>
-          </div>
+    <!-- Coupons Archive -->
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-0">
+            {% if coupons %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 editorial-table">
+                        <thead class="bg-warm text-uppercase extra-small fw-bold letter-spacing-1">
+                            <tr>
+                                <th class="ps-4 py-3">Code / Type</th>
+                                <th class="py-3">Discount</th>
+                                <th class="py-3">Min. Spend</th>
+                                <th class="py-3">Utilization</th>
+                                <th class="py-3">Expiry Status</th>
+                                <th class="py-3">Status</th>
+                                <th class="pe-4 py-3 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for coupon in coupons %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="coupon-code-pill me-3">
+                                            {{ coupon.code }}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if coupon.discount_type == 'percentage' %}
+                                        <span class="tag-minimal success">{{ coupon.discount_value }}% OFF</span>
+                                    {% else %}
+                                        <span class="tag-minimal info">₹{{ coupon.discount_value }} OFF</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-muted small">
+                                        {% if coupon.min_order_value > 0 %}
+                                            ₹{{ coupon.min_order_value }}
+                                        {% else %}
+                                            No Minimum
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="extra-small fw-bold">{{ coupon.times_used }}</span>
+                                        {% if coupon.max_uses %}
+                                            <span class="extra-small text-muted">/ {{ coupon.max_uses }}</span>
+                                            {% set usage_percent = (coupon.times_used / coupon.max_uses * 100)|int %}
+                                            <div class="progress" style="width: 50px; height: 4px;">
+                                                <div class="progress-bar {% if usage_percent >= 80 %}bg-danger{% elif usage_percent >= 50 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                     style="width: {{ usage_percent }}%"></div>
+                                            </div>
+                                        {% else %}
+                                            <span class="extra-small text-muted">/ ∞</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if coupon.expires_at %}
+                                        {% set days_left = ((coupon.expires_at - now).days) %}
+                                        {% if days_left < 0 %}
+                                            <span class="tag-minimal danger">Expired</span>
+                                        {% elif days_left <= 7 %}
+                                            <span class="tag-minimal warning">{{ days_left }} Days Left</span>
+                                        {% else %}
+                                            <span class="extra-small text-muted text-uppercase fw-bold">{{ coupon.expires_at.strftime('%b %d, %y') }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted extra-small">Indefinite</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if coupon.is_active %}
+                                        <div class="status-indicator active"></div>
+                                        <span class="extra-small text-uppercase fw-bold">Active</span>
+                                    {% else %}
+                                        <div class="status-indicator inactive"></div>
+                                        <span class="extra-small text-uppercase fw-bold text-muted">Paused</span>
+                                    {% endif %}
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{{ url_for('admin_coupon_edit', coupon_id=coupon.id) }}" 
+                                           class="btn-icon-action" title="Edit Properties">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        
+                                        <form method="post" action="{{ url_for('admin_coupon_toggle', coupon_id=coupon.id) }}">
+                                            <button type="submit" class="btn-icon-action text-warning" 
+                                                    title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                                <i class="bi bi-{% if coupon.is_active %}pause-circle{% else %}play-circle{% endif %}"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <form method="post" action="{{ url_for('admin_coupon_delete', coupon_id=coupon.id) }}" 
+                                              onsubmit="return confirm('Delete coupon \'{{ coupon.code }}\'?');">
+                                            <button type="submit" class="btn-icon-action text-danger" title="Purge Coupon">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5 bg-warm rounded">
+                    <i class="bi bi-ticket-perforated display-4 text-muted mb-3 d-block"></i>
+                    <p class="text-muted mb-3 italic-serif">No promotional incentives currently active.</p>
+                    <a href="{{ url_for('admin_coupon_add') }}" class="btn btn-dark px-4">Create First Coupon</a>
+                </div>
+            {% endif %}
         </div>
-      </div>
     </div>
-  </div>
-
-  <!-- Coupons Table -->
-  <div class="card border-0 shadow-sm">
-    <div class="card-body">
-      {% if coupons %}
-        <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead class="bg-light">
-              <tr>
-                <th>Code</th>
-                <th>Discount</th>
-                <th>Min. Order</th>
-                <th>Usage</th>
-                <th>Expires</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for coupon in coupons %}
-              <tr>
-                <td>
-                  <div class="d-flex align-items-center">
-                    <div class="bg-primary bg-opacity-10 px-3 py-2 rounded">
-                      <span class="fw-bold text-primary">{{ coupon.code }}</span>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  {% if coupon.discount_type == 'percentage' %}
-                    <span class="badge bg-success">{{ coupon.discount_value }}% OFF</span>
-                  {% else %}
-                    <span class="badge bg-warning text-dark">₹{{ coupon.discount_value }} OFF</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if coupon.min_order_value > 0 %}
-                    ₹{{ coupon.min_order_value }}+
-                  {% else %}
-                    <span class="text-muted">No minimum</span>
-                  {% endif %}
-                </td>
-                <td>
-                  <div class="d-flex align-items-center gap-2">
-                    <span class="fw-semibold">{{ coupon.times_used }}</span>
-                    {% if coupon.max_uses %}
-                      <span class="text-muted">/ {{ coupon.max_uses }}</span>
-                      {% set usage_percent = (coupon.times_used / coupon.max_uses * 100)|int %}
-                      <div class="progress" style="width: 60px; height: 6px;">
-                        <div class="progress-bar 
-                          {% if usage_percent >= 80 %}bg-danger
-                          {% elif usage_percent >= 50 %}bg-warning
-                          {% else %}bg-success{% endif %}" 
-                          style="width: {{ usage_percent }}%">
-                        </div>
-                      </div>
-                    {% else %}
-                      <span class="text-muted">/ ∞</span>
-                    {% endif %}
-                  </div>
-                </td>
-                <td>
-                  {% if coupon.expires_at %}
-                    {% set days_left = ((coupon.expires_at - now).days) %}
-                    {% if days_left < 0 %}
-                      <span class="badge bg-danger">Expired</span>
-                    {% elif days_left == 0 %}
-                      <span class="badge bg-warning text-dark">Expires Today</span>
-                    {% elif days_left <= 7 %}
-                      <span class="badge bg-warning text-dark">{{ days_left }} days left</span>
-                    {% else %}
-                      <span class="text-muted small">{{ coupon.expires_at.strftime('%b %d, %Y') }}</span>
-                    {% endif %}
-                  {% else %}
-                    <span class="badge bg-secondary">No expiry</span>
-                  {% endif %}
-                </td>
-                <td>
-                  {% if coupon.is_active %}
-                    <span class="badge bg-success">Active</span>
-                  {% else %}
-                    <span class="badge bg-danger">Inactive</span>
-                  {% endif %}
-                </td>
-                <td>
-                  <div class="btn-group btn-group-sm">
-                    <a href="{{ url_for('admin_coupon_edit', coupon_id=coupon.id) }}" 
-                       class="btn btn-outline-primary" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    
-                    <form method="post" action="{{ url_for('admin_coupon_toggle', coupon_id=coupon.id) }}" 
-                          style="display: inline;">
-                      <button type="submit" 
-                              class="btn btn-outline-{% if coupon.is_active %}warning{% else %}success{% endif %}" 
-                              title="{% if coupon.is_active %}Deactivate{% else %}Activate{% endif %}">
-                        <i class="bi bi-{% if coupon.is_active %}pause-circle{% else %}play-circle{% endif %}"></i>
-                      </button>
-                    </form>
-                    
-                    <form method="post" action="{{ url_for('admin_coupon_delete', coupon_id=coupon.id) }}" 
-                          style="display: inline;"
-                          onsubmit="return confirm('Delete coupon \'{{ coupon.code }}\'?');">
-                      <button type="submit" class="btn btn-outline-danger" title="Delete">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="text-center py-5">
-          <i class="bi bi-ticket-perforated display-1 text-muted"></i>
-          <h5 class="mt-3 text-muted">No coupons yet</h5>
-          <p class="text-muted">Create your first coupon to get started</p>
-          <a href="{{ url_for('admin_coupon_add') }}" class="btn btn-primary mt-2">
-            <i class="bi bi-plus-circle"></i> Create Coupon
-          </a>
-        </div>
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="mt-3">
-    <a href="{{ url_for('admin_index') }}" class="btn btn-outline-secondary">
-      <i class="bi bi-arrow-left"></i> Back to Dashboard
-    </a>
-  </div>
 </div>
 
 <style>
-  .progress {
-    border-radius: 10px;
-  }
-  .progress-bar {
-    border-radius: 10px;
-  }
+    /* Admin General Styles */
+    .extra-small { font-size: 0.65rem; }
+    .letter-spacing-1 { letter-spacing: 0.1em; }
+    .italic-serif { font-style: italic; font-family: serif; }
+    .bg-warm { background-color: #fdfaf7; }
+    .bg-success-soft { background: #e8f5e9; }
+    
+    .studio-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; font-weight: 800; color: #888; margin-bottom: 0.5rem; display: block; }
+    
+    /* Editorial Table */
+    .editorial-table th { border-bottom: none; }
+    .editorial-table td { padding-top: 1.25rem; padding-bottom: 1.25rem; border-color: #f8f9fa; }
+    .editorial-table tr:hover { background-color: #fdfdfd; }
+
+    /* Coupon Code Pill */
+    .coupon-code-pill { 
+        background: #f1f1f1; 
+        color: #1a1a1a; 
+        font-family: monospace; 
+        padding: 6px 14px; 
+        border-radius: 4px; 
+        font-weight: 700; 
+        font-size: 0.85rem;
+        border: 1px dashed #ccc;
+    }
+
+    /* Status Tags */
+    .tag-minimal { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; letter-spacing: 0.1em; }
+    .tag-minimal.success { background: #e8f5e9; color: #2e7d32; }
+    .tag-minimal.info { background: #e3f2fd; color: #1565c0; }
+    .tag-minimal.warning { background: #fff3e0; color: #ef6c00; }
+    .tag-minimal.danger { background: #ffebee; color: #c62828; }
+
+    /* Indicators */
+    .status-indicator { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .status-indicator.active { background: #2e7d32; box-shadow: 0 0 10px rgba(46,125,50,0.3); }
+    .status-indicator.inactive { background: #ccc; }
+
+    /* Actions */
+    .btn-icon-action { background: none; border: none; font-size: 1.1rem; color: #999; transition: 0.3s; padding: 0; }
+    .btn-icon-action:hover { color: #1a1a1a; transform: scale(1.15); }
+
+    /* Progress */
+    .progress { background-color: #f1f1f1; border-radius: 10px; overflow: hidden; }
+    .progress-bar { transition: width 0.6s ease; }
+
+    /* Mobile Admin Nav Styles */
+    .admin-mobile-nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        z-index: 1050;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .admin-mobile-nav .nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #888; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .admin-mobile-nav .nav-item i { font-size: 1.25rem; margin-bottom: 2px; }
+    .admin-mobile-nav .nav-item.active { color: #1a1a1a; }
+
+    @media (max-width: 768px) {
+        .container.mt-5 { margin-top: 80px !important; }
+        .editorial-table th:nth-child(3), .editorial-table td:nth-child(3),
+        .editorial-table th:nth-child(4), .editorial-table td:nth-child(4) { display: none; }
+    }
 </style>
 {% endblock %}

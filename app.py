@@ -175,7 +175,23 @@ def send_order_confirmation_email(order):
                 <td style="padding: 10px; text-align: right;"><strong>₹{wrap_total}</strong></td>
             </tr>
             """
-        
+        shipping_row = ""
+        if hasattr(order, 'shipping_cost'):
+            if order.shipping_cost > 0:
+                shipping_row = f"""
+                <tr>
+                    <td colspan="3" style="padding: 10px; text-align: right;"><strong>🚚 Shipping:</strong></td>
+                    <td style="padding: 10px; text-align: right;"><strong>₹{order.shipping_cost}</strong></td>
+                </tr>
+                """
+            else:
+                shipping_row = f"""
+                <tr>
+                    <td colspan="3" style="padding: 10px; text-align: right;"><strong>🚚 Shipping:</strong></td>
+                    <td style="padding: 10px; text-align: right;"><strong style="color: #10B981;">FREE</strong></td>
+                </tr>
+                """
+
         # Email HTML template
         html_body = f"""
         <!DOCTYPE html>
@@ -226,6 +242,7 @@ def send_order_confirmation_email(order):
                         </tbody>
                         <tfoot>
                             {wrap_row}
+                            {shipping_row}
                             <tr>
                                 <td colspan="3" style="padding: 15px; text-align: right; font-weight: bold;">Total:</td>
                                 <td style="padding: 15px; text-align: right;" class="total">₹{order.total_amount}</td>
@@ -307,6 +324,12 @@ def send_admin_order_notification(order):
         if wrap_total > 0:
             items_text += f"🎁 Gift Wrap Total: ₹{wrap_total}\n\n"
         
+        if hasattr(order, 'shipping_cost'):
+            if order.shipping_cost > 0:
+                items_text += f"🚚 Shipping: ₹{order.shipping_cost}\n\n"
+            else:
+                items_text += f"🚚 Shipping: FREE\n\n"
+
         admin_email = os.getenv('ADMIN_EMAIL')
         if not admin_email:
             return False
@@ -464,6 +487,7 @@ class Order(db.Model):
     coupon_code = db.Column(db.String(50), nullable=True)
     coupon_discount = db.Column(db.Integer, default=0)
     subtotal = db.Column(db.Integer, nullable=False, default=0)  
+    shipping_cost = db.Column(db.Integer, default=0)
 
     items = db.relationship("OrderItem", backref="order", lazy=True)
 
@@ -1330,10 +1354,7 @@ def checkout():
         city = request.form.get("city")
         pincode = request.form.get("pincode")
         notes = request.form.get("notes")
-        
-        # Handle coupon
-        coupon_code = request.form.get("coupon_code", "").strip().upper()
-        coupon_discount = 0
+    
         
         # Get gift wraps
         import json
@@ -1346,6 +1367,10 @@ def checkout():
         
         wrap_total = sum(wrap.get('price', 0) for wrap in gift_wraps.values())
         subtotal = total + wrap_total
+
+        SHIPPING_COST = 80
+        FREE_SHIPPING_THRESHOLD = 1000
+        shipping_cost = 0 if subtotal >= FREE_SHIPPING_THRESHOLD else SHIPPING_COST
         
         # Validate coupon
         if coupon_code:
@@ -1369,6 +1394,7 @@ def checkout():
             subtotal=subtotal,
             coupon_code=coupon_code if coupon_discount > 0 else None,
             coupon_discount=coupon_discount,
+            shipping_cost=shipping_cost,
             total_amount=final_total,
         )
 
@@ -1440,6 +1466,13 @@ def checkout_ajax():
     wrap_total = sum(wrap.get('price', 0) for wrap in gift_wraps.values())
     subtotal = total + wrap_total
 
+    # Calculate shipping
+    SHIPPING_COST = 80
+    FREE_SHIPPING_THRESHOLD = 1000
+
+    shipping_cost = 0 if subtotal >= FREE_SHIPPING_THRESHOLD else SHIPPING_COST
+    final_total = subtotal - coupon_discount + shipping_cost
+
     # Validate and apply coupon
     if coupon_code:
         coupon = Coupon.query.filter_by(code=coupon_code).first()
@@ -1469,6 +1502,7 @@ def checkout_ajax():
         subtotal=subtotal,
         coupon_code=coupon_code if coupon_discount > 0 else None,
         coupon_discount=coupon_discount,
+        shipping_cost=shipping_cost,
         total_amount=final_total,
         payment_status="Unpaid",
         status="Pending"
@@ -1538,11 +1572,19 @@ def validate_coupon():
     
     discount = coupon.calculate_discount(cart_total)
     new_total = cart_total - discount
+
+    # After calculating discount
+    SHIPPING_COST = 80
+    FREE_SHIPPING_THRESHOLD = 1000
+    shipping = 0 if cart_total >= FREE_SHIPPING_THRESHOLD else SHIPPING_COST
+    new_total = cart_total - discount + shipping
+
     
     return jsonify({
         "valid": True,
         "message": f"Coupon '{code}' applied successfully!",
         "discount": discount,
+        "shipping": shipping,
         "new_total": new_total,
         "discount_type": coupon.discount_type,
         "discount_value": coupon.discount_value

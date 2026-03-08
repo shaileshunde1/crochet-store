@@ -1,677 +1,543 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}KCX Crochet Store{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
     <style>
-      body { 
-        background-color: #FFF8F0; 
-        font-family: 'Poppins', sans-serif;
-        padding-top: 140px;
-      }
-      
-      /* ==================== ANNOUNCEMENT BAR - Light Beige/Cream ==================== */
-      .announcement-bar {
-        background: linear-gradient(135deg, #F5E6D3 0%, #FFF8DC 100%);
-        color: #6B4423;
-        padding: 10px 0;
-        font-size: 0.9rem;
-        font-weight: 600;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1050;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      }
-
-      .announcement-bar i {
-        margin-right: 8px;
-        color: #6B4423;
-      }
-
-      /* ==================== STICKY NAVBAR - Dark Brown ==================== */
-      .navbar {
-        position: fixed;
-        top: 40px;
-        left: 0;
-        right: 0;
-        z-index: 1040;
-        transition: all 0.3s ease;
-        background: linear-gradient(135deg, #6B4423 0%, #8B6F47 100%) !important;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      }
-
-      .navbar.scrolled {
-        top: 0;
-        padding-top: 0.5rem;
-        padding-bottom: 0.5rem;
-      }
-
-      .navbar.scrolled .announcement-bar {
-        display: none;
-      }
-
-      /* ==================== LOGO - Simple Daisy Flower ==================== */
-      .navbar-brand {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        font-weight: 600;
-        font-size: 2rem;
-        letter-spacing: 0.1em;
-        color: #FFF8F0 !important;
-        transition: all 0.3s ease;
-        font-family: 'Cormorant Garamond', serif;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0;
-      }
-
-      /* Logo text with flower */
-      .navbar-brand .logo-text {
-        display: flex;
-        align-items: center;
-        font-weight: 500;
-        letter-spacing: 0.05em;
-      }
-
-      /* Cherry Blossom Flower replacing 'O' */
-      .navbar-brand .crochet-flower {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 0.75em;
-        height: 0.75em;
-        margin: 0 0.05em;
-        position: relative;
-        vertical-align: middle;
-        transform: translateY(-0.02em);
-      }
-
-      /* Cherry Blossom emoji */
-      .navbar-brand .crochet-flower::before {
-        content: '🌸';
-        position: absolute;
-        font-size: 0.85em;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
-      }
-
-      .navbar-brand .crochet-flower::after {
-        content: '';
-      }
-
-      .navbar-brand .store-text {
-        margin-left: 0.4em;
-        font-weight: 500;
-        letter-spacing: 0.1em;
-        font-family: 'Cormorant Garamond', serif;
-      }
-
-      .navbar.scrolled .navbar-brand {
-        font-size: 1.6rem;
-      }
-
-      /* Nav links - Light text on dark background */
-      .navbar .nav-link {
-        color: #FFF8F0 !important;
-        font-weight: 500;
-        transition: all 0.3s;
-      }
-
-      .navbar .nav-link:hover {
-        color: #F5E6D3 !important;
-        transform: translateY(-2px);
-      }
-
-      .navbar .container {
-        position: relative;
-      }
-
-      .nav-left {
-        margin-right: auto;
-      }
-
-      .nav-right {
-        margin-left: auto;
-      }
-
-      /* Category Dropdown */
-      .category-dropdown .dropdown-menu {
-        border-radius: 12px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-        border: none;
-        padding: 0.5rem;
-        min-width: 200px;
-        background-color: #FFF8F0;
-      }
-
-      .category-dropdown .dropdown-item {
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        transition: all 0.2s;
-        font-weight: 500;
-        color: #6B4423;
-      }
-
-      .category-dropdown .dropdown-item:hover {
-        background: linear-gradient(135deg, #A67C52 0%, #8B6F47 100%);
-        color: #FFF8F0;
-        transform: translateX(5px);
-      }
-
-      .category-dropdown .dropdown-item i {
-        margin-right: 8px;
-        width: 20px;
-      }
-
-      /* Dropdown toggle arrow */
-      .navbar .dropdown-toggle::after {
-        color: #FFF8F0;
-      }
-
-      /* Footer */
-      footer {
-        background: linear-gradient(135deg, #2d3436 0%, #1e272e 100%);
-        color: #dfe6e9;
-        margin-top: 5rem;
-      }
-
-      .footer-section {
-        padding: 3rem 0 1rem 0;
-      }
-
-      .footer-title {
-        color: white;
-        font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        padding-bottom: 0.5rem;
-      }
-
-      .footer-title::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 40px;
-        height: 2px;
-        background: linear-gradient(135deg, #A67C52 0%, #8B6F47 100%);
-      }
-
-      .footer-link {
-        color: #b2bec3;
-        text-decoration: none;
-        display: block;
-        margin-bottom: 0.75rem;
-        transition: all 0.3s;
-      }
-
-      .footer-link:hover {
-        color: white;
-        padding-left: 5px;
-      }
-
-      .contact-item {
-        display: flex;
-        align-items: start;
-        margin-bottom: 1rem;
-        color: #b2bec3;
-      }
-
-      .contact-item i {
-        margin-right: 12px;
-        margin-top: 4px;
-        color: #A67C52;
-        font-size: 1.2rem;
-      }
-
-      .social-links a {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
-        line-height: 40px;
-        text-align: center;
-        background: #34495e;
-        color: white;
-        border-radius: 50%;
-        margin-right: 10px;
-        transition: all 0.3s;
-      }
-
-      .social-links a:hover {
-        background: linear-gradient(135deg, #A67C52 0%, #8B6F47 100%);
-        transform: translateY(-3px);
-      }
-
-      .footer-bottom {
-        border-top: 1px solid #34495e;
-        padding: 1.5rem 0;
-        margin-top: 2rem;
-        text-align: center;
-        font-size: 0.9rem;
-      }
-
-      .policy-accordion .accordion-item {
-        background-color: transparent;
-        border: 1px solid #34495e;
-        margin-bottom: 0.5rem;
-        border-radius: 8px;
-      }
-
-      .policy-accordion .accordion-button {
-        background-color: transparent;
-        color: white;
-        font-weight: 500;
-        border-radius: 8px;
-      }
-
-      .policy-accordion .accordion-button:not(.collapsed) {
-        background-color: rgba(166, 124, 82, 0.1);
-        color: white;
-      }
-
-      .policy-accordion .accordion-body {
-        background-color: rgba(0,0,0,0.2);
-        color: #b2bec3;
-        font-size: 0.9rem;
-        line-height: 1.8;
-      }
-
-      @media (max-width: 991px) {
-        .navbar-brand {
-          position: static;
-          transform: none;
-          font-size: 1.5rem;
+        :root {
+            --text-main: #3c352d; 
+            --text-muted: #8c8279;
+            --bg-site: #fdfaf6; 
+            --bg-nav: #faf6f2; 
+            --bg-announcement: #f4eee8; 
+            --accent: #8b6f47;
+            --pink-glow: rgba(255, 182, 193, 0.9); /* Slightly stronger for the SVG */
+            --serif: 'Playfair Display', serif;
+            --sans: 'Inter', sans-serif;
+            --nav-height: 90px;
+            --announcement-height: 38px;
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .navbar.scrolled .navbar-brand {
-          font-size: 1.3rem;
+        html { scroll-behavior: smooth; }
+        
+        /* Subtle Grain Texture Overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03;
+            z-index: 9999;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        body {
-          padding-top: 120px;
+        body { 
+            background-color: var(--bg-site); 
+            font-family: var(--sans); 
+            color: var(--text-main);
+            padding-top: calc(var(--nav-height) + var(--announcement-height));
+            background-image: radial-gradient(#ece2d8 0.8px, transparent 0.8px);
+            background-size: 40px 40px;
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
         }
-      }
 
-      @media (max-width: 768px) {
+        .reveal {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s var(--easing);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==================== ANNOUNCEMENT BAR ==================== */
         .announcement-bar {
-          font-size: 0.8rem;
-          padding: 8px 0;
+            background-color: var(--bg-announcement);
+            color: var(--text-main); 
+            height: var(--announcement-height);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-weight: 600;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 1050;
+            transition: transform 0.5s var(--easing);
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+        }
+
+        body.is-scrolled .announcement-bar {
+            transform: translateY(-100%);
+        }
+
+        /* ==================== NAVBAR ==================== */
+        .navbar {
+            height: var(--nav-height);
+            background: rgba(250, 246, 242, 0.9) !important;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            position: fixed;
+            top: var(--announcement-height); 
+            left: 0; right: 0;
+            z-index: 1040;
+            transition: all 0.5s var(--easing);
+            padding: 0;
+        }
+
+        .navbar .container {
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        body.is-scrolled .navbar {
+            top: 0;
+            height: 75px;
+            background: rgba(250, 246, 242, 0.98) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02);
+        }
+
+        /* Centered Brand Wrapper */
+        .navbar-brand-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s var(--easing);
+            white-space: nowrap;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        body.is-scrolled .navbar-brand-wrapper {
+            transform: translate(-50%, -50%) scale(0.85);
         }
 
         .navbar-brand {
-          font-size: 1.3rem;
+            font-family: var(--serif);
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--text-main) !important;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            margin: 0;
+            pointer-events: auto;
         }
 
-        .footer-section {
-          padding: 2rem 0 1rem 0;
+        .brand-studio-tag {
+            font-family: var(--sans);
+            font-size: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            display: block;
+            text-align: center;
+            opacity: 0.6;
+            margin-top: -2px;
+            color: var(--text-muted);
+        }
+
+        /* CUSTOM CROCHET SVG FLOWER */
+        .crochet-flower {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.1em;
+            height: 1.1em;
+            margin: 0 4px;
+            filter: drop-shadow(0 0 8px var(--pink-glow));
+            animation: flower-pulse 4s infinite ease-in-out;
+            vertical-align: middle;
+        }
+
+        .crochet-flower svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        @keyframes flower-pulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 14px var(--pink-glow)); }
+        }
+
+        .nav-link {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.25em;
+            font-weight: 600;
+            color: var(--text-main) !important;
+            padding: 0.5rem 1.2rem !important;
+            transition: 0.3s;
+            position: relative;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            width: 0;
+            height: 1px;
+            background: var(--text-main);
+            transition: 0.3s;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover::after { width: 15px; }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            padding: 1rem 0;
+            background: white;
+            border-top: 1px solid var(--bg-announcement);
+        }
+        
+        .dropdown-item {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding: 0.8rem 2rem;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--bg-warm);
+            color: var(--text-main);
+        }
+
+        /* ==================== FOOTER ==================== */
+        footer {
+            background-color: var(--bg-announcement);
+            padding: 7rem 0 3rem;
+            margin-top: 8rem;
+            position: relative;
+            border-top: 1px solid rgba(0,0,0,0.02);
+        }
+        
+        footer::before {
+            content: '🌸';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.2rem;
+            background: var(--bg-site);
+            padding: 0 20px;
+            filter: drop-shadow(0 0 5px var(--pink-glow));
         }
 
         .footer-title {
-          font-size: 1rem;
+            font-family: var(--serif);
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
         }
-      }
+        
+        .studio-card {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 2.5rem;
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* ==================== UI ELEMENTS ==================== */
+        .btn-editorial {
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 1.1rem 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: 0.4s var(--easing);
+            border-radius: 0;
+        }
+        .btn-editorial:hover { 
+            background: var(--accent); 
+            transform: translateY(-2px); 
+        }
+
+        .custom-toast {
+            background: white;
+            border-left: 2px solid var(--accent);
+            color: var(--text-main);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            padding: 1.25rem;
+        }
+        
+        @media (max-width: 991px) {
+            body { padding-top: 110px; }
+            .navbar { height: 80px; }
+            .navbar-brand { font-size: 1.2rem; letter-spacing: 0.12em; }
+            .brand-studio-tag { font-size: 0.45rem; }
+            
+            .navbar-brand-wrapper {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                width: auto;
+            }
+            body.is-scrolled .navbar-brand-wrapper {
+                transform: translate(-50%, -50%) scale(0.85);
+            }
+        }
     </style>
-  </head>
+</head>
 
-  <body>
-
-    <!-- Announcement Bar - Light Beige/Cream -->
+<body>
+    <!-- Announcement Bar -->
     <div class="announcement-bar text-center" id="announcementBar">
-      <div class="container">
-        <i class="bi bi-truck"></i>
-        <strong>FREE SHIPPING</strong> on all orders over ₹1,000 across India!
-      </div>
+        <div class="container">
+            Complimentary India delivery on orders over ₹1,000
+        </div>
     </div>
 
-    <!-- Navbar - Dark Brown -->
-    <nav class="navbar navbar-expand-lg navbar-dark" id="mainNavbar">
-      <div class="container">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light" id="mainNavbar">
+        <div class="container">
+            <button class="navbar-toggler border-0 p-0" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon" style="width: 18px;"></span>
+            </button>
 
-        <!-- Left side navigation -->
-        <div class="nav-left d-flex align-items-center">
-          <a class="nav-link" href="/shop">Shop</a>
-          
-          <!-- Categories Dropdown -->
-          <div class="nav-item dropdown category-dropdown ms-3">
-            <a class="nav-link dropdown-toggle" href="#" id="categoriesMenu" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-              Categories
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/shop"><i class="bi bi-grid-3x3-gap"></i> All Products</a></li>
-              <li><hr class="dropdown-divider"></li>
-              {% for category in categories_global %}
-              <li>
-                <a class="dropdown-item" href="/shop?category={{ category }}">
-                  <i class="bi bi-tag"></i> {{ category }}
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/shop">Archive</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Series</a>
+                        <ul class="dropdown-menu shadow-sm">
+                            <li><a class="dropdown-item" href="/shop">Full Range</a></li>
+                            <li><hr class="dropdown-divider mx-3 opacity-5"></li>
+                            {% for category in categories_global %}
+                            <li><a class="dropdown-item" href="/shop?category={{ category }}">{{ category }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Identity with Custom Crochet SVG -->
+            <div class="navbar-brand-wrapper">
+                <a class="navbar-brand" href="/">
+                    KCX CRO<span class="crochet-flower">
+                        <!-- Custom Crocheted SVG Flower -->
+                        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Center changed to Accent Brown for better contrast -->
+                            <circle cx="50" cy="50" r="12" fill="#8b6f47" />
+                            <!-- Petals changed to a deeper, more visible aesthetic pink -->
+                            <circle cx="50" cy="22" r="18" fill="#f4b9b9" stroke="#e0a3a3" stroke-width="2" />
+                            <circle cx="78" cy="40" r="18" fill="#f4b9b9" stroke="#e0a3a3" stroke-width="2" />
+                            <circle cx="68" cy="72" r="18" fill="#f4b9b9" stroke="#e0a3a3" stroke-width="2" />
+                            <circle cx="32" cy="72" r="18" fill="#f4b9b9" stroke="#e0a3a3" stroke-width="2" />
+                            <circle cx="22" cy="40" r="18" fill="#f4b9b9" stroke="#e0a3a3" stroke-width="2" />
+                        </svg>
+                    </span>CHET
                 </a>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
+                <span class="brand-studio-tag d-none d-lg-block">Studio Archives</span>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center">
+                {% if session.get('is_admin') %}
+                <a class="nav-link d-none d-md-block" href="{{ url_for('admin_index') }}">Admin</a>
+                {% endif %}
+                <a class="nav-link" data-bs-toggle="offcanvas" href="#cartOffcanvas">
+                    Bag 
+                    {% if cart_count_global and cart_count_global > 0 %}
+                    <span class="ms-1 fw-bold" style="color: var(--text-main);">[{{ cart_count_global }}]</span>
+                    {% endif %}
+                </a>
+            </div>
         </div>
-
-        <!-- Centered Logo with Simple Daisy Flower -->
-        <a class="navbar-brand" href="/">
-          <span class="logo-text">
-            KCX CR<span class="crochet-flower"></span>CHET
-          </span>
-          <span class="store-text">STORE</span>
-        </a>
-
-        <!-- Right side navigation -->
-        <div class="nav-right d-flex align-items-center">
-
-          <!-- ADMIN DROPDOWN -->
-          {% if session.get('is_admin') %}
-          <div class="nav-item dropdown me-3">
-            <a class="nav-link dropdown-toggle" href="#" id="adminMenu" role="button"
-               data-bs-toggle="dropdown" aria-expanded="false">
-              Admin
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{{ url_for('admin_index') }}">
-                <i class="bi bi-speedometer2"></i> Dashboard
-              </a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_orders') }}">
-                <i class="bi bi-receipt"></i> Orders
-              </a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_products') }}">
-                <i class="bi bi-box-seam"></i> Products
-              </a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_categories') }}">
-                <i class="bi bi-tags"></i> Categories
-              </a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_coupons') }}">
-                <i class="bi bi-tag-fill"></i> Coupons
-              </a></li>
-              <li><a class="dropdown-item" href="{{ url_for('admin_reviews') }}">
-                <i class="bi bi-star-fill text-warning"></i> Reviews
-              </a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="{{ url_for('admin_logout') }}">
-                <i class="bi bi-box-arrow-right"></i> Logout
-              </a></li>
-            </ul>
-          </div>
-          {% else %}
-          <a class="nav-link me-3" href="{{ url_for('admin_login') }}">Admin</a>
-          {% endif %}
-
-          <!-- CART BUTTON -->
-          <a class="nav-link"
-             data-bs-toggle="offcanvas"
-             href="#cartOffcanvas"
-             role="button"
-             aria-controls="cartOffcanvas">
-             <i class="bi bi-bag"></i> Cart ({{ cart_count_global or 0 }})
-          </a>
-
-        </div>
-
-      </div>
     </nav>
 
-    <main>
-      {% block content %}{% endblock %}
+    <main id="main-reveal-container">
+        <div class="toast-container position-fixed end-0 p-4" id="toastContainer" style="z-index: 9999; top: 110px;"></div>
+        {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
     <footer>
-      <div class="footer-section">
         <div class="container">
-          <div class="row">
-            
-            <!-- About Section -->
-            <div class="col-md-4 mb-4">
-              <h5 class="footer-title">About KCX Crochet</h5>
-              <p style="color: #b2bec3; font-size: 0.9rem; line-height: 1.8;">
-                Handcrafted crochet items made with love and care. Each piece is unique and created with premium quality materials.
-              </p>
-              <div class="social-links mt-3">
-                <a href="https://www.instagram.com/kcx.crochett?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" title="Instagram" target="_blank">
-                  <i class="bi bi-instagram"></i>
-                </a>
-              </div>
-            </div>
-
-            <!-- Contact Us -->
-            <div class="col-md-4 mb-4">
-              <h5 class="footer-title">Contact Us</h5>
-              <div class="contact-item">
-                <i class="bi bi-envelope-fill"></i>
-                <div>
-                  <strong>Email:</strong><br>
-                  <a href="mailto:shaileshalternate@gmail.com" class="footer-link" style="display: inline;">shaileshalternate@gmail.com</a>
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <h5 class="footer-title">KCX Studio</h5>
+                    <p class="text-muted small lh-lg" style="max-width: 380px;">
+                        Hand-stitched in Mumbai. We embrace the slow nature of crochet to create pieces that resonate with tactile warmth and timeless artistry.
+                    </p>
+                    <div class="mt-4">
+                        <a href="https://www.instagram.com/kcx.crochett?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
+                           class="text-dark fs-5" target="_blank" title="Instagram">
+                            <i class="bi bi-instagram"></i>
+                        </a>
+                    </div>
                 </div>
-              </div>
-              <div class="contact-item">
-                <i class="bi bi-phone-fill"></i>
-                <div>
-                  <strong>Phone:</strong><br>
-                  <a href="tel:+918433898954" class="footer-link" style="display: inline;">+91 8433898954</a>
-                </div>
-              </div>
-              <div class="contact-item">
-                <i class="bi bi-whatsapp"></i>
-                <div>
-                  <strong>WhatsApp:</strong><br>
-                  <a href="https://wa.me/8433898954" class="footer-link" style="display: inline;" target="_blank">+91 8433898954</a>
-                </div>
-              </div>
-              <div class="contact-item">
-                <i class="bi bi-geo-alt-fill"></i>
-                <div>
-                  <strong>Location:</strong><br>
-                  Mumbai, Maharashtra, India
-                </div>
-              </div>
-            </div>
-
-            <!-- Policies -->
-            <div class="col-md-4 mb-4">
-              <h5 class="footer-title">Policies</h5>
-              
-              <div class="accordion policy-accordion" id="policyAccordion">
                 
-                <!-- Shipping Policy -->
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#shippingPolicy">
-                      <i class="bi bi-truck me-2"></i> Shipping Policy
-                    </button>
-                  </h2>
-                  <div id="shippingPolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
-                    <div class="accordion-body">
-                      <p><strong>Delivery Time:</strong> 7-14 business days across India</p>
-                      <p><strong>Free Shipping:</strong> On orders above ₹1,000</p>
-                      <p><strong>Shipping Charges:</strong> ₹100 for orders below ₹1,000</p>
-                      <p><strong>Tracking:</strong> Tracking details will be sent via email/SMS once your order is shipped.</p>
-                      <p>We ship Monday to Saturday. Orders placed on Sunday will be processed on Monday.</p>
+                <div class="col-lg-6 offset-lg-1">
+                    <div class="studio-card">
+                        <div class="row">
+                            <div class="col-md-6 mb-4 mb-md-0">
+                                <h6 class="fw-bold small text-uppercase mb-2" style="letter-spacing: 0.1em;">Shipping Policy</h6>
+                                <p class="text-muted small mb-3">7-12 business days India-wide. Orders processed within 4-5 days.</p>
+                                
+                                <h6 class="fw-bold small text-uppercase mb-2" style="letter-spacing: 0.1em;">Returns</h6>
+                                <p class="text-muted small mb-0">No returns on custom pieces; exchanges for shipping damages only.</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="fw-bold small text-uppercase mb-2" style="letter-spacing: 0.1em;">General Inquiry</h6>
+                                <p class="text-muted small mb-3">kcxstorealternatee@gmail.com</p>
+                                
+                                <h6 class="fw-bold small text-uppercase mb-2" style="letter-spacing: 0.1em;">Location</h6>
+                                <p class="text-muted small mb-0">Mumbai, India — 400001</p>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
-
-                <!-- Returns Policy -->
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#returnsPolicy">
-                      <i class="bi bi-arrow-repeat me-2"></i> Returns Policy
-                    </button>
-                  </h2>
-                  <div id="returnsPolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
-                    <div class="accordion-body">
-                      <p><strong>Note:</strong> Custom-made items are non-returnable.</p>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Privacy Policy -->
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#privacyPolicy">
-                      <i class="bi bi-shield-check me-2"></i> Privacy Policy
-                    </button>
-                  </h2>
-                  <div id="privacyPolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
-                    <div class="accordion-body">
-                      <p>We respect your privacy and are committed to protecting your personal information.</p>
-                      <p><strong>Information We Collect:</strong></p>
-                      <ul>
-                        <li>Name, email, phone number</li>
-                        <li>Shipping address</li>
-                        <li>Payment information (securely processed)</li>
-                      </ul>
-                      <p><strong>How We Use It:</strong></p>
-                      <ul>
-                        <li>Process and deliver your orders</li>
-                        <li>Send order updates and notifications</li>
-                        <li>Improve our products and services</li>
-                      </ul>
-                      <p>We never share your information with third parties without your consent.</p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
             </div>
-
-          </div>
+            <div class="pt-5 mt-5 border-top border-dark border-opacity-5 text-center">
+                <p class="small text-muted mb-0" style="letter-spacing: 0.15em;">&copy; 2025 KCX STUDIO. HAND-FINISHED IN INDIA.</p>
+            </div>
         </div>
-      </div>
-
-      <!-- Footer Bottom -->
-      <div class="footer-bottom">
-        <div class="container">
-          <p class="mb-0">&copy; 2025 KCX Crochet Store. Handmade with <i class="bi bi-heart-fill text-danger"></i> in India.</p>
-        </div>
-      </div>
     </footer>
 
-    <!-- Cart Offcanvas -->
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title">Your Cart</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-      </div>
-      <div class="offcanvas-body">
-        {% if cart_items_global %}
-          {% for item in cart_items_global %}
-            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-              <div style="width: 60px; height: 60px;" class="me-3 flex-shrink-0">
-                <img
-                  src="{{ url_for('static', filename=item.product.image_url) }}"
-                  alt="{{ item.product.name }}"
-                  class="img-fluid rounded"
-                  style="width: 100%; height: 100%; object-fit: cover;"
-                >
-              </div>
-              <div class="flex-grow-1">
-                <h6 class="mb-0">{{ item.product.name }}</h6>
-                {% if item.color_variant or item.size_variant %}
-                   <small class="text-muted d-block">
-                    {% if item.color_variant %}
-                      <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.color_variant.name }}</span>
-                     {% endif %}
-                     {% if item.size_variant %}
-                        <span class="badge bg-secondary" style="font-size: 0.65rem;">{{ item.size_variant.name }}</span>
-                     {% endif %}
-                   </small>
-                  {% endif %}
-                
-                {% if item.size %}
-                  <p class="small text-muted mb-1">Size: {{ item.size }}</p>
-                {% endif %}
-                {% if item.color %}
-                  <p class="small text-muted mb-1">Color: {{ item.color }}</p>
-                {% endif %}
-                {% if item.wrap %}
-                  <p class="small text-success mb-1"><i class="bi bi-gift"></i> {{ item.wrap }}</p>
-                {% endif %}
-                
-                {% if item.product.sale_price %}
-                  <p class="small mb-1">
-                    <span class="text-decoration-line-through text-muted">₹{{ item.effective_price }}</span>
-                    <span class="text-danger fw-bold ms-2">₹{{ item.product.sale_price }}</span>
-                  </p>
-                {% else %}
-                  <p class="small text-muted mb-1">₹{{ item.effective_price }}</p>
-                {% endif %}
-
-                <div class="d-flex justify-content-between align-items-center">
-                  <div class="d-inline-flex align-items-center">
-                    <a href="{{ url_for('decrease_quantity', cart_key=item.cart_key) }}"
-                        class="btn btn-sm btn-outline-secondary">-</a>
-                    <span class="px-3">{{ item.quantity }}</span>
-                    <a href="{{ url_for('increase_quantity', cart_key=item.cart_key) }}"
-                       class="btn btn-sm btn-outline-secondary">+</a>
-                  </div>
-                  <a href="{{ url_for('remove_from_cart', cart_key=item.cart_key) }}"
-                     class="btn btn-link text-danger small p-0">
-                    Remove
-                  </a>
+    <!-- Cart -->
+    <div class="offcanvas offcanvas-end border-0" tabindex="-1" id="cartOffcanvas" style="background: var(--bg-site);">
+        <div class="offcanvas-header px-4 py-5">
+            <h5 class="offcanvas-title" style="font-family: var(--serif); font-weight: 600;">Your Bag</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-4">
+            {% if cart_items_global %}
+                <div class="cart-items-list">
+                    {% for item in cart_items_global %}
+                    <div class="d-flex gap-4 mb-5">
+                        <div class="flex-shrink-0" style="width: 90px; height: 120px; background: var(--bg-announcement);">
+                            <img src="{{ url_for('static', filename=item.product.image_url) }}" class="w-100 h-100 object-fit-cover" alt="">
+                        </div>
+                        <div class="flex-grow-1 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="small mb-2 fw-bold text-uppercase" style="letter-spacing: 0.05em;">{{ item.product.name }}</h6>
+                                <p class="small text-muted mb-0">Quantity: {{ item.quantity }}</p>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-end">
+                                <span class="fw-bold small">₹{{ item.product.sale_price if item.product.sale_price else item.effective_price }}</span>
+                                <a href="{{ url_for('remove_from_cart', cart_key=item.cart_key) }}" class="text-muted small text-decoration-none border-bottom border-dark">Remove</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-              </div>
-            </div>
-          {% endfor %}
-
-          <hr>
-          <div class="d-flex justify-content-between mb-3">
-            <strong>Total</strong>
-            <strong>₹{{ cart_total_global }}</strong>
-          </div>
-          <a href="{{ url_for('checkout') }}" class="btn btn-dark w-100 mb-2">
-            Checkout
-          </a>
-
-          <a href="{{ url_for('shop') }}" class="btn btn-outline-secondary w-100">Continue shopping</a>
-        {% else %}
-          <p>Your cart is empty.</p>
-          <a href="{{ url_for('shop') }}" class="btn btn-dark w-100 mt-2">Start shopping</a>
-        {% endif %}
-      </div>
+                <div class="border-top pt-5 mt-auto">
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="text-uppercase small fw-bold" style="letter-spacing: 0.1em;">Total</span>
+                        <span class="fw-bold">₹{{ cart_total_global }}</span>
+                    </div>
+                    <a href="{{ url_for('checkout') }}" class="btn-editorial w-100 text-center d-block">Proceed to Checkout</a>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <p class="italic-serif text-muted" style="font-size: 1.2rem;">Your bag is currently empty.</p>
+                    <a href="/shop" class="text-link small mt-3 d-inline-block text-dark">Explore the Archive</a>
+                </div>
+            {% endif %}
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        {% if cart_open_global %}
-          var offcanvasEl = document.getElementById('cartOffcanvas');
-          if (offcanvasEl) {
-            var bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
-            bsOffcanvas.show();
-          }
-        {% endif %}
-
-        const navbar = document.getElementById('mainNavbar');
-        const announcement = document.getElementById('announcementBar');
-        
+        // Scroll Management
         window.addEventListener('scroll', function() {
-          if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-            announcement.style.display = 'none';
-          } else {
-            navbar.classList.remove('scrolled');
-            announcement.style.display = 'block';
-          }
+            const body = document.body;
+            if (window.scrollY > 20) {
+                body.classList.add('is-scrolled');
+            } else {
+                body.classList.remove('is-scrolled');
+            }
+            revealOnScroll();
         });
-      });
-    </script>
 
-  </body>
+        function revealOnScroll() {
+            const reveals = document.querySelectorAll('.reveal');
+            for (let i = 0; i < reveals.length; i++) {
+                const windowHeight = window.innerHeight;
+                const elementTop = reveals[i].getBoundingClientRect().top;
+                const elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('section, .product-minimal-grid');
+            sections.forEach(s => s.classList.add('reveal'));
+            revealOnScroll(); 
+        });
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            const toastHTML = `
+                <div class="custom-toast mb-3 d-flex align-items-center justify-content-between" id="${toastId}">
+                    <span class="fw-medium">${message}</span>
+                    <button type="button" class="btn-close ms-3" style="font-size: 0.6rem" onclick="document.getElementById('${toastId}').remove()"></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', toastHTML);
+            setTimeout(() => {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-10px)';
+                    toast.style.transition = '0.5s';
+                    setTimeout(() => toast.remove(), 500);
+                }
+            }, 5000);
+        }
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    showToast({{ message | tojson | safe }}, {{ category | tojson | safe }});
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% if cart_open_global %}
+            var cartEl = document.getElementById('cartOffcanvas');
+            if (cartEl) {
+                var bsCart = new bootstrap.Offcanvas(cartEl);
+                bsCart.show();
+            }
+        {% endif %}
+    </script>
+</body>
 </html>
