@@ -98,10 +98,10 @@
                                 {% if review.image1_url or review.image2_url %}
                                 <div class="d-flex gap-2 mb-4">
                                     {% if review.image1_url %}
-                                        <img src="{{ url_for('static', filename=review.image1_url) }}" class="review-attachment shadow-sm">
+                                        <img src="{{ review.image1_url if review.image1_url and review.image1_url.startswith('http') else url_for('static', filename=review.image1_url) }}" class="review-attachment shadow-sm">
                                     {% endif %}
                                     {% if review.image2_url %}
-                                        <img src="{{ url_for('static', filename=review.image2_url) }}" class="review-attachment shadow-sm">
+                                        <img src="{{ review.image2_url if review.image2_url and review.image2_url.startswith('http') else url_for('static', filename=review.image2_url) }}" class="review-attachment shadow-sm">
                                     {% endif %}
                                 </div>
                                 {% endif %}

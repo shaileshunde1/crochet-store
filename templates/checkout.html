@@ -423,7 +423,7 @@
                 <div class="order-item">
                     <div class="item-img-frame">
                         {% if item.product.images %}
-                            <img src="{{ url_for('static', filename=item.product.images[0].image_url) }}" alt="{{ item.product.name }}">
+                            <img src="{{ item.product.images[0].image_url if item.product.images[0].image_url and item.product.images[0].image_url.startswith('http') else url_for('static', filename=item.product.images[0].image_url) }}" alt="{{ item.product.name }}">
                         {% else %}
                             <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted small">No Image</div>
                         {% endif %}

@@ -18,10 +18,10 @@
                 <div class="product-gallery-sticky">
                     <div class="product-main-frame mb-3 rounded-1 shadow-sm overflow-hidden">
                         {% if product.images and product.images|length > 0 %}
-                            <img id="mainImage" src="{{ url_for('static', filename=product.images[0].image_url) }}" 
+                            <img id="mainImage" src="{{ product.images[0].image_url if product.images[0].image_url and product.images[0].image_url.startswith('http') else url_for('static', filename=product.images[0].image_url) }}"
                                  class="img-fluid main-view-img" alt="{{ product.name }}">
                         {% elif product.image_url %}
-                            <img id="mainImage" src="{{ url_for('static', filename=product.image_url) }}" 
+                            <img id="mainImage" src="{{ product.image_url if product.image_url and product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}" 
                                  class="img-fluid main-view-img" alt="{{ product.name }}">
                         {% else %}
                             <div class="placeholder-frame">No Image Available</div>
@@ -54,8 +54,8 @@
                         {% if product.images and product.images|length > 1 %}
                             {% for img in product.images %}
                                 <div class="thumb-item {% if loop.index == 1 %}active{% endif %}" 
-                                     onclick="changeMainImage('{{ url_for('static', filename=img.image_url) }}', this)">
-                                    <img src="{{ url_for('static', filename=img.image_url) }}" alt="Gallery view {{ loop.index }}">
+                                     onclick="changeMainImage('{{ img.image_url if img.image_url and img.image_url.startswith('http') else url_for('static', filename=img.image_url) }}', this)">
+                                    <img src="{{ img.image_url if img.image_url and img.image_url.startswith('http') else url_for('static', filename=img.image_url) }}" alt="Gallery view {{ loop.index }}">
                                 </div>
                             {% endfor %}
                         {% endif %}
@@ -192,9 +192,9 @@
                 <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-link text-decoration-none d-block">
                     <div class="product-image-wrapper rounded-1 overflow-hidden shadow-sm mb-3">
                         {% if p.image_url %}
-                            <img src="{{ url_for('static', filename=p.image_url) }}" class="product-img-main" alt="{{ p.name }}">
+                            <img src="{{ p.image_url if p.image_url and p.image_url.startswith('http') else url_for('static', filename=p.image_url) }}" class="product-img-main" alt="{{ p.name }}">
                         {% elif p.images and p.images|length > 0 %}
-                            <img src="{{ url_for('static', filename=p.images[0].image_url) }}" class="product-img-main" alt="{{ p.name }}">
+                            <img src="{{ p.images[0].image_url if p.images[0].image_url and p.images[0].image_url.startswith('http') else url_for('static', filename=p.images[0].image_url) }}" class="product-img-main" alt="{{ p.name }}">
                         {% endif %}
 
                         <div class="badge-stack">
@@ -369,7 +369,7 @@ const productData = {
     allImages: [
         {% if product.images %}
             {% for img in product.images %}
-                "{{ url_for('static', filename=img.image_url) }}"{% if not loop.last %},{% endif %}
+                "{{ img.image_url if img.image_url and img.image_url.startswith('http') else url_for('static', filename=img.image_url) }}"{% if not loop.last %},{% endif %}
             {% endfor %}
         {% endif %}
     ]

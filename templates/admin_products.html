@@ -63,14 +63,14 @@
                     <!-- Image Section -->
                     <div class="inventory-card-image">
                         {% if product.images and product.images|length > 0 %}
-                            <img src="{{ url_for('static', filename=product.images[0].image_url) }}" alt="{{ product.name }}">
+                            <img src="{{ product.images[0].image_url if product.images[0].image_url and product.images[0].image_url.startswith('http') else url_for('static', filename=product.images[0].image_url) }}" alt="{{ product.name }}">
                             {% if product.images|length > 1 %}
                                 <div class="image-count-indicator">
                                     <i class="bi bi-images me-1"></i> {{ product.images|length }}
                                 </div>
                             {% endif %}
                         {% elif product.image_url %}
-                            <img src="{{ url_for('static', filename=product.image_url) }}" alt="{{ product.name }}">
+                            <img src="{{ product.image_url if product.image_url and product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}" alt="{{ product.name }}">
                         {% else %}
                             <div class="no-image-placeholder">
                                 <i class="bi bi-image text-muted opacity-25"></i>

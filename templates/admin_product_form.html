@@ -61,7 +61,7 @@
                   <div class="col-6 col-md-4 col-lg-3 image-card" data-image-id="{{ img.id }}" draggable="true">
                     <div class="position-relative image-wrapper">
                       <div class="drag-handle"><i class="bi bi-grip-vertical"></i></div>
-                      <img src="{{ url_for('static', filename=img.image_url) }}" alt="Product" class="img-fluid rounded shadow-sm">
+                      <img src="{{ img.image_url if img.image_url and img.image_url.startswith('http') else url_for('static', filename=img.image_url) }}" alt="Product" class="img-fluid rounded shadow-sm">
                       <div class="image-overlay">
                         <button type="button" class="btn btn-sm btn-light set-main-btn" data-image-id="{{ img.id }}" title="Set as main">
                           <i class="bi bi-star"></i>
