@@ -55,10 +55,10 @@
                 <div class="product-item">
                     <a href="{{ url_for('product_detail', product_id=product.id) }}" class="product-link">
                         <div class="product-image-wrapper">
-                            {% if product.image_url %}
-                                <img src="{{ url_for('static', filename=product.image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                           {% if product.image_url %}
+                                <img src="{{ product.image_url if product.image_url.startswith('http') else url_for('static', filename=product.image_url) }}" class="product-img-main" alt="{{ product.name }}">
                             {% elif product.images and product.images|length > 0 %}
-                                <img src="{{ url_for('static', filename=product.images[0].image_url) }}" class="product-img-main" alt="{{ product.name }}">
+                                <img src="{{ product.images[0].image_url if product.images[0].image_url.startswith('http') else url_for('static', filename=product.images[0].image_url) }}" class="product-img-main" alt="{{ product.name }}">
                             {% else %}
                                 <div class="product-placeholder">No Image</div>
                             {% endif %}
@@ -66,7 +66,7 @@
                             <!-- Hover Images Cycle -->
                             {% if product.images and product.images|length > 1 %}
                                 {% for img in product.images[1:4] %}
-                                    <img src="{{ url_for('static', filename=img.image_url) }}" class="product-img-hover" style="display: none;">
+                                    <img src="{{ img.image_url if img.image_url.startswith('http') else url_for('static', filename=img.image_url) }}" class="product-img-hover" style="display: none;">
                                 {% endfor %}
                             {% endif %}
 
